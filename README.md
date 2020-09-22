@@ -1,4 +1,5 @@
-# septa_cup_web_server
+# Septa Cup Backend
+
 Бэкенд на Django REST Framework.
 
 Аутентификация через социальные сети: VK, Google, ... .
