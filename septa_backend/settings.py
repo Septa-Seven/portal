@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import environ
-from django.conf.global_settings import AUTH_USER_MODEL
 
 env = environ.Env()
 environ.Env.read_env()
@@ -24,8 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
+AUTH_USER_MODEL = 'users.User'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ics9j_mo0%)hwabru(huc_md7fn4$^)i#9q56oh805x+9ogc8='
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # our apps
+    # apps
     'apps.users',
     'rest_framework',
     'rest_framework.authtoken',
