@@ -113,7 +113,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-# TODO create email, this one is fake
 # https://www.hostinger.com.ua/rukovodstva/kak-ispolzovat-smtp-server
 EMAIL_USE_TLS = True
 EMAIL_HOST = env('EMAIL_HOST')
