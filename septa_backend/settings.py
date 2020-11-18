@@ -44,10 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'apps.users',
+    'apps.news',
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
     'corsheaders',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 
 
@@ -141,6 +144,12 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'None'
+    },
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -159,5 +168,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CKEDITOR_UPLOAD_PATH = 'uploads/'
 
 CORS_ALLOW_ALL_ORIGINS = True

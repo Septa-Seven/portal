@@ -22,6 +22,7 @@ schema_view = get_schema_view(
 
 api_urlpatterns = [
     path('users/', include('apps.users.urls')),
+    path('news/', include('apps.news.urls')),
 ]
 
 urlpatterns = [
@@ -29,5 +30,6 @@ urlpatterns = [
     path('api/', include(api_urlpatterns)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
