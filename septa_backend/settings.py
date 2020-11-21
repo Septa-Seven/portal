@@ -135,6 +135,7 @@ DJOSER = {
     'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {},
+    'TOKEN_MODEL': None
 }
 
 SIMPLE_JWT = {
