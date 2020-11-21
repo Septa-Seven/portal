@@ -3,11 +3,11 @@ from django.utils import timezone
 from ckeditor_uploader.fields import RichTextUploadingField
 
 
-class NewsItem(models.Model):
-    STATUS_CHOICES = (
-        ('draft', 'Draft'),
-        ('published', 'Published'),
-    )
+class News(models.Model):
+    class StatusChoices(models.TextChoices):
+        DRAFT = ('draft', 'Draft')
+        PUBLISHED = ('published', 'Published')
+
     title = models.CharField(max_length=250)
     slug = models.SlugField(
         max_length=250,
@@ -19,8 +19,8 @@ class NewsItem(models.Model):
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(
         max_length=10,
-        choices=STATUS_CHOICES,
-        default='draft'
+        choices=StatusChoices.choices,
+        default=StatusChoices.DRAFT
     )
 
     class Meta:

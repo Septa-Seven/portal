@@ -1,8 +1,9 @@
 from django.contrib import admin
-from apps.news.models import NewsItem
+from apps.news.models import News
 
-@admin.register(NewsItem)
-class NewsItemAdmin(admin.ModelAdmin):
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
     list_display = (
         'title',
         'slug',
