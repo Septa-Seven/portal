@@ -48,9 +48,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
+    'django_editorjs_fields',
     'corsheaders',
-    'ckeditor',
-    'ckeditor_uploader',
 ]
 
 
@@ -118,6 +117,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 2
 }
 
 # https://www.hostinger.com.ua/rukovodstva/kak-ispolzovat-smtp-server
@@ -145,11 +146,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': 'None'
-    },
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -169,7 +165,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
-CKEDITOR_UPLOAD_PATH = 'uploads/'
 
 CORS_ALLOW_ALL_ORIGINS = True
