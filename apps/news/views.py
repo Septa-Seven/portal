@@ -1,21 +1,23 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import permissions, viewsets
 
 from .models import News
-from .serializers import NewsListSerializer, NewsDetailSerializer
+from .serializers import NewsDetailSerializer, NewsListSerializer
 
 
-class NewsListView(APIView):
-    """Here's all published news"""
-    def get(self, request):
-        all_news = News.objects.filter(status='published')
-        serializer = NewsListSerializer(all_news, many=True)
-        return Response(serializer.data)
+class NewsViewSet(viewsets.ModelViewSet):
+    queryset = News.objects.all()
+    # serializer_class = NewsDetailSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            serializer_class = NewsListSerializer
+        else:
+            serializer_class = NewsDetailSerializer
+        return serializer_class
 
-class NewsDetailView(APIView):
-    """Here's detailed news"""
-    def get(self, request, pk):
-        news = News.objects.get(id=pk, status='published')
-        serializer = NewsDetailSerializer(news)
-        return Response(serializer.data)
+    # def get_permissions(self):
+    #     if self.action in ['list', 'retrieve']:
+    #         permission_classes = [permissions.AllowAny]
+    #     else:
+    #         permission_classes = [permissions.IsAdminUser]
+    #     return [permission() for permission in permission_classes]
