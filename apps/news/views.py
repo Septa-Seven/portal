@@ -15,9 +15,9 @@ class NewsViewSet(viewsets.ModelViewSet):
             serializer_class = NewsDetailSerializer
         return serializer_class
 
-    # def get_permissions(self):
-    #     if self.action in ['list', 'retrieve']:
-    #         permission_classes = [permissions.AllowAny]
-    #     else:
-    #         permission_classes = [permissions.IsAdminUser]
-    #     return [permission() for permission in permission_classes]
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAdminUser]
+        return [permission() for permission in permission_classes]
