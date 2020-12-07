@@ -1,23 +1,17 @@
 from rest_framework import permissions, viewsets
 
-from .models import News
-from .serializers import NewsDetailSerializer, NewsListSerializer
+from apps.news.models import News
+from apps.news.serializers import NewsPreviewSerializer, NewsFullSerializer
 
 
-class NewsViewSet(viewsets.ModelViewSet):
-    queryset = News.objects.all()
-    # serializer_class = NewsDetailSerializer
+class NewsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = News.objects.filter(status=News.StatusChoices.PUBLISHED).all()
+    permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
         if self.action == 'list':
-            serializer_class = NewsListSerializer
+            serializer_class = NewsPreviewSerializer
         else:
-            serializer_class = NewsDetailSerializer
-        return serializer_class
+            serializer_class = NewsFullSerializer
 
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            permission_classes = [permissions.AllowAny]
-        else:
-            permission_classes = [permissions.IsAdminUser]
-        return [permission() for permission in permission_classes]
+        return serializer_class
