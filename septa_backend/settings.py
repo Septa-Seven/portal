@@ -13,11 +13,11 @@ import datetime
 from pathlib import Path
 import environ
 
-env = environ.Env()
-environ.Env.read_env()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(str(BASE_DIR / '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -89,7 +89,14 @@ WSGI_APPLICATION = 'septa_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 DATABASES = {
-    'default': env.db(),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
+    },
 }
 
 # Password validation
