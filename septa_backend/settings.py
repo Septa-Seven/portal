@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'apps.users',
     'apps.news',
+    'apps.comments',
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
