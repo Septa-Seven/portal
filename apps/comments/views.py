@@ -9,7 +9,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """
     Вьюсет комментария.
     list, retrieve доступен всем (даже неавторизованным);
-    create - авторзованному пользователю,
+    create - авторзованному пользователю;
     delete - владельцу комментария.
     """
     queryset = Comment.objects.filter(active=True).all()
@@ -21,10 +21,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         return CommentDetailSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            self.permission_classes = [permissions.AllowAny]
-        elif self.action == 'create':
-            self.permission_classes = [permissions.IsAuthenticated]
+        if self.action == 'create':
+            permission_classes = [permissions.IsAuthenticated]
         elif self.action == 'delete':
-            self.permission_classes = [permissions.IsAdminUser, IsOwner]
-        return super(self.__class__, self).get_permissions()
+            permission_classes = [permissions.IsAdminUser, IsOwner]
+        else:
+            permission_classes = [permissions.AllowAny]
+
+        return [permission_class() for permission_class in permission_classes]
