@@ -1,9 +1,9 @@
 from rest_framework.routers import SimpleRouter
-from apps.news import views
+from apps.articles import views
 
 
 router = SimpleRouter()
 
-router.register('', views.NewsViewSet)
+router.register('', views.ArticleViewSet)
 
 urlpatterns = router.urls

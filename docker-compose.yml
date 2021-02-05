@@ -2,15 +2,21 @@ version: "3.9"
 
 services:
   web:
-    build: ./
-    command: /bin/sh -c "python manage.py migrate --no-input && python manage.py runserver 0.0.0.0:8000"
+    build: ./app
+    command: /bin/sh -c "python manage.py collectstatic --no-input &&
+    python manage.py migrate --no-input &&
+    gunicorn septacup_backend.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - ./:/code
-    ports:
-      - 8000:8000
+      - ./:/home/app/web/
+      - static_data:/home/app/web/static/
+      - media_data:/home/app/web/media/
+    expose:
+      - 8000
     depends_on:
       - db
-    working_dir: /code
+    working_dir: /usr/src/septacup-backend
+    env_file:
+      - .env
   db:
     image: postgres:13.1-alpine
     volumes:
@@ -21,9 +27,17 @@ services:
       - POSTGRES_DB=${DB_NAME}
     ports:
       - 5432:5432
-    healthcheck:
-      test: ./postgres_heathcheck.sh
-      interval: 1s
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - web
+    volumes:
+      - static_data:/home/app/web/static/
+      - media_data:/home/app/web/media/
 
 volumes:
   postgres_data:
+  static_data:
+  media_data:
