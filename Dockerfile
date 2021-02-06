@@ -43,18 +43,15 @@ WORKDIR $APP_HOME
 
 # install dependencies
 RUN apk update && apk add libpq
-COPY --from=builder /usr/src/app/wheels /wheels
-COPY --from=builder /usr/src/app/requirements.txt .
+COPY --from=builder /usr/src/septacup/wheels /wheels
+COPY --from=builder /usr/src/septacup/requirements.txt .
 RUN pip install --no-cache /wheels/*
 
 # copy entrypoint.sh
 COPY ./entrypoint.sh $APP_HOME
 
 # copy project
-COPY . $APP_HOME
-
-# chown all the files to the app user
-RUN chown -R app:app $APP_HOME
+COPY --chown=app:app . $APP_HOME
 
 # change to the app user
 USER app
