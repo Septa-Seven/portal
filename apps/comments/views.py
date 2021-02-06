@@ -1,7 +1,7 @@
 from rest_framework import permissions, viewsets
 
 from apps.comments.models import Comment
-from apps.comments.serializers import CommentListSerializer, CommentDetailSerializer
+from apps.comments.serializers import CommentSerializer
 from apps.comments.permissions import IsOwner
 
 
@@ -12,19 +12,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     create - авторзованному пользователю;
     delete - владельцу комментария.
     """
-    queryset = Comment.objects.filter(active=True).all()
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return CommentListSerializer
-
-        return CommentDetailSerializer
+    queryset = Comment.active_objects.all()
+    serializer_class = CommentSerializer
 
     def get_permissions(self):
         if self.action == 'create':
             permission_classes = [permissions.IsAuthenticated]
         elif self.action == 'delete':
-            permission_classes = [permissions.IsAdminUser, IsOwner]
+            permission_classes = [permissions.IsAdminUser | IsOwner]
         else:
             permission_classes = [permissions.AllowAny]
 

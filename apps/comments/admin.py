@@ -6,24 +6,21 @@ from apps.comments.models import Comment
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
         'user',
-        'news',
-        'publish',
-        'active'
+        'article',
+        'active',
     )
     list_filter = (
         'active',
-        'created',
-        'publish',
+        'created_at',
     )
     search_fields = (
         'body',
-        'news',
-        'user'
+        'article',
+        'user',
     )
-    date_hierarchy = 'publish'
+    date_hierarchy = 'created_at'
     ordering = (
         'active',
-        'publish',
-        'news',
-        'user'
+        'article',
+        'user',
     )

@@ -1,15 +1,15 @@
 from rest_framework import serializers
 
-from .models import Comment
+from apps.comments.models import Comment
 
 
-class CommentListSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('id', 'active', 'user', 'news', 'publish')
-
-
-class CommentDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = '__all__'
+        fields = (
+            'id',
+            'body',
+            'created_at',
+            'user',
+            'article',
+        )
