@@ -10,7 +10,7 @@ class ArticleAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'status',
-        'created',
+        'created_at',
     )
     search_fields = (
         'title',

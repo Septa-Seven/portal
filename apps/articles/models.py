@@ -8,19 +8,21 @@ class Article(models.Model):
         PUBLISHED = ('published', 'Published')
 
     title = models.CharField(max_length=250)
+
     body = EditorJsJSONField()
 
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     status = models.CharField(
-        max_length=10,
+        max_length=9,
         choices=StatusChoices.choices,
         default=StatusChoices.DRAFT
     )
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ('-created_at',)
 
     def __str__(self):
         return self.title
