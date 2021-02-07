@@ -8,9 +8,11 @@ class Article(models.Model):
         PUBLISHED = ('published', 'Published')
 
     title = models.CharField(max_length=250)
+
     body = EditorJsJSONField()
 
     created_at = models.DateTimeField(auto_now_add=True)
+
     updated_at = models.DateTimeField(auto_now=True)
 
     status = models.CharField(

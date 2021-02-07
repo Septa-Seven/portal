@@ -20,7 +20,7 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
 
         if self.action == 'retrieve':
             queryset = queryset.prefetch_related(
-                Prefetch('comments', queryset=Comment.active_objects.all())
+                Prefetch('comments', queryset=Comment.objects.filter(active=True))
             )
 
         return queryset

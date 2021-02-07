@@ -14,8 +14,8 @@ class ArticleListSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'body',
-            'created',
-            'updated',
+            'created_at',
+            'updated_at',
             'comments_count',
         )
 
@@ -30,8 +30,8 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'body',
-            'created',
-            'updated',
+            'created_at',
+            'updated_at',
             'comments_count',
             'comments',
         )

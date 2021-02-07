@@ -12,7 +12,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     create - авторзованному пользователю;
     delete - владельцу комментария.
     """
-    queryset = Comment.active_objects.all()
+    queryset = Comment.objects.filter(active=True)
     serializer_class = CommentSerializer
 
     def get_permissions(self):
@@ -24,3 +24,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.AllowAny]
 
         return [permission_class() for permission_class in permission_classes]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
