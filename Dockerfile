@@ -56,6 +56,9 @@ COPY --chown=app:app . $APP_HOME
 RUN mkdir $APP_HOME/static
 RUN chown app:app $APP_HOME/static
 
+RUN mkdir $APP_HOME/media
+RUN chown app:app $APP_HOME/media
+
 # change to the app user
 USER app
 
