@@ -27,7 +27,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/septacup/wheels -r r
 #########
 
 # pull official base image
-FROM python:3.8.5-alpine
+FROM python:3.8.5-alpine as final
 
 # create directory for the app user
 RUN mkdir -p /home/app
@@ -52,6 +52,9 @@ COPY ./entrypoint.sh $APP_HOME
 
 # copy project
 COPY --chown=app:app . $APP_HOME
+
+RUN mkdir $APP_HOME/static
+RUN chown app:app $APP_HOME/static
 
 # change to the app user
 USER app

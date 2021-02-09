@@ -7,8 +7,8 @@ services:
       python manage.py migrate --no-input &&
       gunicorn septacup_backend.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - static_data:/home/app/web/static/
-      - media_data:/home/app/web/media/
+      - static_volume:/home/app/web/static/
+      - media_volume:/home/app/web/media/
     expose:
       - 8000
     depends_on:
@@ -32,10 +32,10 @@ services:
     depends_on:
       - web
     volumes:
-      - static_data:/home/app/web/static/
-      - media_data:/home/app/web/media/
+      - static_volume:/home/app/web/static/
+      - media_volume:/home/app/web/media/
 
 volumes:
   postgres_data:
-  static_data:
-  media_data:
+  static_volume:
+  media_volume:
