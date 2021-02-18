@@ -5,7 +5,7 @@ import tempfile
 import docker
 
 from apps.strategies.models import Strategy
-from septa_backend import settings
+from django.conf import settings
 
 
 class StrategyBuildFailed(Exception):
