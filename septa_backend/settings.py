@@ -16,8 +16,10 @@ import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
-environ.Env.read_env(str(BASE_DIR / '.env'))
+env = environ.Env(
+    ACCESS_TOKEN_LIFETIME=int,
+)
+environ.Env.read_env(str(BASE_DIR / '.env_test'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -43,13 +45,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'drf_yasg',
-    'apps.users',
-    'apps.news',
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
     'django_editorjs_fields',
     'corsheaders',
+    'apps.users.apps.UsersConfig',
+    'apps.news.apps.NewsConfig',
+    'apps.strategies.apps.StrategiesConfig',
 ]
 
 
@@ -118,11 +121,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# AUTH_USER_MODEL = 'users.SeptaUser'
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 2
@@ -147,7 +151,7 @@ DJOSER = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=env('ACCESS_TOKEN_LIFETIME')),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'AUTH_HEADER_TYPES': ('JWT',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
@@ -171,6 +175,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+# STATIC_URL = '/static/'
+#
+# MEDIA_URL = env('MEDIA_URL')
+# MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+REGISTRY_REPOSITORY = 'strategies'
+STRATEGY_IMAGE_TAG_FORMAT = '{user_id}-{programming_language}-{strategy_id}'
+STRATEGY_IMAGE_NAME_FORMAT = '{repository}/{tag}'
