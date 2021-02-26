@@ -131,7 +131,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 2
 }
 
-# https://www.hostinger.com.ua/rukovodstva/kak-ispolzovat-smtp-server
 EMAIL_USE_TLS = True
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
