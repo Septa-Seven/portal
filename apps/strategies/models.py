@@ -33,5 +33,5 @@ class Strategy(models.Model):
 
     # TODO: Определить формат наименований файлов стратегий
     file = models.FileField(
-        upload_to='strategies',
+        upload_to='strategies/',
     )

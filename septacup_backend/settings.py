@@ -192,3 +192,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 REGISTRY_REPOSITORY = 'strategies'
 STRATEGY_IMAGE_TAG_FORMAT = '{user_id}-{programming_language}-{strategy_id}'
 STRATEGY_IMAGE_NAME_FORMAT = '{repository}/{tag}'
+
+CONTENT_TYPES = ['application/zip', 'multipart/mixed']
+# 2.5MB - 2621440
+# 5MB - 5242880
+# 10MB - 10485760
+# 20MB - 20971520
+# 50MB - 5242880
+# 100MB 104857600
+# 250MB - 214958080
+# 500MB - 429916160
+MAX_UPLOAD_SIZE = 2097152

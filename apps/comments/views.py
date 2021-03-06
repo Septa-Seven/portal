@@ -9,7 +9,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """
     Вьюсет комментария.
     list, retrieve доступен всем (даже неавторизованным);
-    create - авторзованному пользователю;
+    create - авторизованному пользователю;
     delete - владельцу комментария.
     """
     queryset = Comment.objects.filter(active=True)
