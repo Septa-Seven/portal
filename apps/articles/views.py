@@ -1,4 +1,6 @@
 from django.db.models import Count, Prefetch
+from django.db.models.expressions import Window
+from django.db.models.functions import Lag, Lead
 
 from rest_framework import permissions, viewsets
 
@@ -8,8 +10,15 @@ from apps.comments.models import Comment
 
 
 class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Вьюсет статьи
+    Количество статей в списке на страницу устанавливается в settings.py
+    Параметр 'PAGE_SIZE' в REST_FRAMEWORK
+    """
     queryset = Article.objects.annotate(
-        comments_count=Count('comments')
+        comments_count=Count('comments'),
+        previous_page=Window(expression=Lag('id')),
+        next_page=Window(expression=Lead('id'))
     )
     permission_classes = (permissions.AllowAny,)
 
