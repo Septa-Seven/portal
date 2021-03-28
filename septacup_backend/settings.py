@@ -121,8 +121,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# AUTH_USER_MODEL = 'users.SeptaUser'
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
