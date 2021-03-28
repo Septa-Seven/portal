@@ -23,6 +23,8 @@ class ArticleListSerializer(serializers.ModelSerializer):
 class ArticleDetailSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    previous_article_id = serializers.IntegerField(read_only=True)
+    next_article_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Article
@@ -34,4 +36,6 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             'updated_at',
             'comments_count',
             'comments',
+            'previous_article_id',
+            'next_article_id',
         )
