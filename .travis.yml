@@ -1,3 +1,4 @@
+language: generic
 deploy:
   provider: elasticbeanstalk
   access_key_id: $AWS_ACCESS_KEY_ID
@@ -7,5 +8,6 @@ deploy:
   app: "septa"
   env: "septa-website"
   bucket_name: "elasticbeanstalk-eu-central-1-243829800264"
+  bucket_path: "/travis-builds/"
   on:
     branch: master
