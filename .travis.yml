@@ -7,6 +7,6 @@ deploy:
   app: "septa"
   env: "septa-website"
   bucket_name: "elasticbeanstalk-eu-central-1-243829800264"
-  bucket_path: "/travis-builds/"
+  bucket_path: "travis-builds/"
   on:
     branch: master
