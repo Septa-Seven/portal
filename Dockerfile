@@ -62,5 +62,7 @@ RUN chown app:app $APP_HOME/media
 # change to the app user
 USER app
 
+EXPOSE 80
+
 # run entrypoint.sh
 ENTRYPOINT ["/home/app/web/entrypoint.sh"]

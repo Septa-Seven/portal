@@ -6,36 +6,7 @@ services:
     command: /bin/sh -c "python manage.py collectstatic --no-input &&
       python manage.py migrate --no-input &&
       gunicorn septacup_backend.wsgi:application --bind 0.0.0.0:8000"
-    volumes:
-      - static_volume:/home/app/web/static/
-      - media_volume:/home/app/web/media/
-    expose:
-      - 8000
-    depends_on:
-      - db
-    env_file:
-      - .env
-  db:
-    image: postgres:13.1-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    ports:
-      - 5432:5432
-  nginx:
-    build: ./nginx
     ports:
       - 80:80
-    depends_on:
-      - web
-    volumes:
-      - static_volume:/home/app/web/static/
-      - media_volume:/home/app/web/media/
-
-volumes:
-  postgres_data:
-  static_volume:
-  media_volume:
+    env_file:
+      - .env
