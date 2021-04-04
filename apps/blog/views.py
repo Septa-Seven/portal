@@ -3,9 +3,33 @@ from django.db.models.expressions import OuterRef
 
 from rest_framework import permissions, viewsets
 
-from apps.articles.models import Article
-from apps.articles.serializers import ArticleDetailSerializer, ArticleListSerializer
-from apps.comments.models import Comment
+from apps.blog.models import Article, Comment
+from apps.blog.serializers import *
+from apps.blog.permissions import IsOwner
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """
+    Вьюсет комментария.
+    list, retrieve доступен всем (даже неавторизованным);
+    create - авторизованному пользователю;
+    delete - владельцу комментария.
+    """
+    queryset = Comment.objects.filter(active=True)
+    serializer_class = CommentSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            permission_classes = [permissions.IsAuthenticated]
+        elif self.action == 'delete':
+            permission_classes = [permissions.IsAdminUser | IsOwner]
+        else:
+            permission_classes = [permissions.AllowAny]
+
+        return [permission_class() for permission_class in permission_classes]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
@@ -13,7 +37,7 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
     Вьюсет статьи
     """
     queryset = Article.objects.annotate(
-        comments_count=Count('comments')
+        comments_count=Count('article_comments')
     )
     permission_classes = (permissions.AllowAny,)
 
@@ -33,7 +57,7 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
                     ).order_by('created_at').values('id')[:1]
                 )
             ).prefetch_related(
-                Prefetch('comments', queryset=Comment.objects.filter(active=True))
+                Prefetch('article_comments', queryset=Comment.objects.filter(active=True))
             )
         # Admin has access to unpublished articles to visually
         # inspect them after frontend rendering.

@@ -7,7 +7,7 @@ import django_editorjs_fields.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('articles', '0001_initial'),
+        ('blog', '0001_initial'),
     ]
 
     operations = [

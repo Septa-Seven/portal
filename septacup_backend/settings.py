@@ -51,8 +51,7 @@ INSTALLED_APPS = [
     'django_editorjs_fields',
     'corsheaders',
     'apps.users.apps.UsersConfig',
-    'apps.articles.apps.ArticlesConfig',
-    'apps.comments.apps.CommentsConfig',
+    'apps.blog.apps.BlogConfig',
 ]
 
 
