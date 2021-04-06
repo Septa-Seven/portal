@@ -12,9 +12,6 @@ after_script:
   - docker-compose run septa-backend python manage.py migrate || travis_terminate 1
   - docker-compose run septa-backend python manage.py createsuperuser --no-input || travis_terminate 1
 
-before_deploy:
-  - zip deploy-archive.zip docker-compose.yml
-
 deploy:
   provider: elasticbeanstalk
   access_key_id: "$AWS_ACCESS_KEY_ID"
@@ -22,7 +19,7 @@ deploy:
   region: "eu-central-1"
   app: "septa"
   env: "septa-website"
-  zip_file: "deploy-archive.zip"
+  zip_file: "docker-compose.yml"
   bucket_name: "elasticbeanstalk-eu-central-1-243829800264"
   bucket_path: "versions/"
   on:
