@@ -47,9 +47,6 @@ COPY --from=builder /usr/src/septacup/wheels /wheels
 COPY --from=builder /usr/src/septacup/requirements.txt .
 RUN pip install --no-cache /wheels/*
 
-# copy entrypoint.sh
-COPY ./entrypoint.sh $APP_HOME
-
 # copy project
 COPY --chown=app:app . $APP_HOME
 
@@ -62,7 +59,6 @@ RUN chown app:app $APP_HOME/media
 # change to the app user
 USER app
 
-EXPOSE 80
+EXPOSE 8000
 
-# run entrypoint.sh
-ENTRYPOINT ["/home/app/web/entrypoint.sh"]
+CMD ["gunicorn", "septacup_backend.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+
 import datetime
 from pathlib import Path
+
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -135,9 +137,9 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env('EMAIL_PORT')
 
-# Для построения писем с ссылками на домен фронтенда
+# Backend domain to construct letters
 DOMAIN = env('DOMAIN')
-SITE_NAME = 'Septa Cup'
+SITE_NAME = 'Septa'
 
 BACKEND_DOMAIN = env('BACKEND_DOMAIN')
 
@@ -151,7 +153,7 @@ DJOSER = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=env('ACCESS_TOKEN_LIFETIME', default=15)),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'AUTH_HEADER_TYPES': ('JWT',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
@@ -182,3 +184,32 @@ MEDIA_URL = BACKEND_DOMAIN + '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+# AWS specific settings
+
+USE_AWS_S3 = env('USE_AWS_S3', default=False)
+
+if USE_AWS_S3:
+    INSTALLED_APPS.append('django_s3_storage')
+
+    # AWS authentication
+    AWS_REGION = env('AWS_REGION')
+    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+
+    # Media settings
+    DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
+
+    # No auth by default
+    AWS_S3_BUCKET_AUTH = False
+    AWS_S3_BUCKET_NAME = env('AWS_S3_BUCKET_NAME')
+    AWS_S3_ADDRESSING_STYLE = 'auto'
+    AWS_S3_KEY_PREFIX = 'media'
+
+    # Static files settings
+    STATICFILES_STORAGE = 'django_s3_storage.storage.StaticS3Storage'
+
+    AWS_S3_BUCKET_NAME_STATIC = env('AWS_S3_BUCKET_NAME')
+    AWS_S3_ADDRESSING_STYLE_STATIC = 'auto'
+    AWS_S3_KEY_PREFIX_STATIC = 'static'
