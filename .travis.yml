@@ -4,13 +4,13 @@ services:
   - docker
 
 script:
-  - docker-compose build || travis_terminal 1
-  - echo "$DOCKER_PASSWORD" | docker login "$DOCKER_ID" || travis_terminal 1
-  - docker-compose push || travis_terminal 1
+  - docker-compose build || travis_terminate 1
+  - echo "$DOCKER_PASSWORD" | docker login "$DOCKER_ID" --password-stdin || travis_terminate 1
+  - docker-compose push || travis_terminate 1
 
 after_script:
-  - docker-compose run septa-backend python manage.py migrate || travis_terminal 1
-  - docker-compose run septa-backend python manage.py createsuperuser --no-input || travis_terminal 1
+  - docker-compose run septa-backend python manage.py migrate || travis_terminate 1
+  - docker-compose run septa-backend python manage.py createsuperuser --no-input || travis_terminate 1
 
 before_deploy:
   - zip deploy-archive.zip docker-compose.yml

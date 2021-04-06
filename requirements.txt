@@ -33,7 +33,6 @@ jmespath==0.10.0
 kombu==5.0.2
 MarkupSafe==1.1.1
 packaging==20.8
-pkg-resources==0.0.0
 prompt-toolkit==3.0.14
 psycopg2-binary==2.8.6
 PyJWT==1.7.1
