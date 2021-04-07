@@ -1,118 +1,104 @@
-# Septa Cup Backend
+# Run locally in docker
 
-Бэкенд на Django REST Framework.
+Build backend with local development config:
+```commandline
+docker-compose -f docker-compose.dev.yml build
+```
 
-Аутентификация через социальные сети: VK, Google, ... .
+Collect static files and run migrations:
+```commandline
+docker-compose -f docker-compose.dev.yml run septa-backend python manage.py collectstatic
+docker-compose -f docker-compose.dev.yml run septa-backend python manage.py migrate
+```
 
-Новости. Создание и редактирование новостей с помощью редактора в администраторской панели. 
+Run in detach mode:
+```commandline
+docker-compose -f docker-compose.dev.yml up -d
+```
 
-Архив игр. Сайт и рейтинговую систему связывают игры. С помощью сайта можно получить данные об играх участников, посмотреть метаданные игры (участники партии, счет, статус (сыграно или обрабатывается), лог игры для просмотра в визуализаторе).
+Create superuser without input (see [environment variables](#superuser))
+```commandline
+docker-compose -f docker-compose.dev.yml run septa-backend python manage.py createsuperuser --no-input
+```
 
-Профиль. Отправка архива, содержащего стратегию участника, с ограничением на размер 20 МБ, посмотр своих (тот же архив игр, только для своих игр), редактирование данных профиля (имя, аватар).
 
+# Environment variables
 
-## Users app
+Store environment variables in **_.env_** file or in shell.
 
-### Регистрация нового пользователя
-_~/auth/users/_ 
+## [Django settings](https://docs.djangoproject.com/en/3.1/ref/settings/)
 
-POST (в body указывать следующие поля со значениями: username, password, email)
+### Core
 
-На указанный email придет письмо со ссылкой для подтверждения регистрации.
+```dotenv
+DEBUG=True
+SECRET_KEY=<string>
+```
 
-В письме ссылка вида http://127.0.0.1:8000/#/activate/Nw/ac9lkb-89b0d4648ab93f9ebf93d459a5d175eb.
-Для этой ссылки uid - Nw, token - ac9lkb-89b0d4648ab93f9ebf93d459a5d175eb
+### Email
 
-### Подтверждение регистрации (активация пользователя)
-_~/auth/users/activation/_
+```dotenv
+EMAIL_HOST=<string>
+EMAIL_HOST_USER=<string>
+EMAIL_HOST_PASSWORD=<string>
+EMAIL_PORT=<int>
+```
 
-POST (в body указывать следующие поля со значениями: uid, token)
+### Superuser
 
-страница возвращает 204
+Provide credentials to create superuser without input.
 
-### Получение jwt-токена
-_~/auth/jwt/create_
+```dotenv
+DJANGO_SUPERUSER_USERNAME=<>
+DJANGO_SUPERUSER_EMAIL=<>
+DJANGO_SUPERUSER_PASSWORD=<>
+```
 
-POST (в body указывать следующие поля со значениями: username, password)
+## Database (PostgreSQL)
 
-страница возвращает 
-`{
-    "refresh": <>,
-    "access": <>
-}
-`
-### Проверить, что пользователь авторизован
-_~/auth/users/me/_ 
+```dotenv
+DB_NAME=<Database name>
+DB_USER=<Database user>
+DB_PASSWORD=<Database password>
+DB_HOST=<Database host>
+DB_PORT=<Database port>
+```
 
-GET (в headers указывать следующие поля со значениями: Authorization - JWT <token>)
+## Djoser
 
-страница возвращает 
-`{
-    "email": <>,
-    "id": <>,
-    "username": <>
-}
-`
-## News app
+Djoser uses [django-templated-mail](https://django-templated-mail.readthedocs.io/en/latest/settings.html) as mailing backend.
 
-### Список новостей
-_~/api/news/_
+```dotenv
+DOMAIN=<Frontend domain>
+```
+Djoser uses [Django Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/) as JWT token library.
 
-GET (для любого пользователя)
+```dotenv
+ACCESS_TOKEN_LIFETIME=15
+```
 
-количество новостей на одну страницу в _settings.py_, _REST_FRAMEWORK ('PAGE_SIZE')_
+## AWS S3 serving
 
-страница возвращает
-`{
-    "count": <количество новостей всего>,
-    "next": <ссылка на следующую страницу списка>,
-    "previous": <ссылка на предыдущую страницу списка>,
-    "results": [
-        {
-            "title":<>,
-            "slug": <>,
-            "publish": <>"
-        },
-        ...
-        {
-            "title": <>,
-            "slug": <>,
-            "publish": <>"
-        }
-    ]
-}`
+To use AWS S3 as media and static storage make sure **USE_AWS_S3** is True and
+settings to connect to AWS is provided. [Django S3 storage]() is used as
+backend storage.
 
-### Создать новость
-_~/api/news/create/_
+```dotenv
+USE_AWS_S3=True
 
-POST (администратор)
+AWS_REGION=<>
+AWS_ACCESS_KEY_ID=<>
+AWS_SECRET_ACCESS_KEY=<>
+AWS_S3_BUCKET_NAME=<>
+```
 
-### Детальный просмотр/изменение новости
-_~/api/news/<id новости>/_
+## Filesystem serving
 
-GET (для любого пользователя)
+When runned locally **BACKEND_DOMAIN** settings responsible
+for media url construction.
 
-страница возвращает
-`{
-    "id": 3,
-    "title": <>,
-    "slug": <>,
-    "body": {
-        "time": 1606495560832,
-        "blocks": [
-            {
-                "data": {
-                    "text": <>"
-                },
-                "type": "paragraph"
-            }
-        ],
-        "version": "2.19.0"
-    },
-    "publish": "2020-11-27T21:45:05+05:00",
-    "created": "2020-11-27T21:46:07.282271+05:00",
-    "updated": "2020-11-27T21:46:07.282271+05:00",
-    "status": "published" или "draft"
-}`
+_MEDIA_URL = BACKEND_DOMAIN + /media/_
 
-PUT/DELETE (администратор)
+```dotenv
+BACKEND_DOMAIN=<>
+```
