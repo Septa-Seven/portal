@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_editorjs_fields',
     'corsheaders',
+    'taggit',
     'apps.users.apps.UsersConfig',
     'apps.blog.apps.BlogConfig',
 ]
@@ -125,7 +126,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 2
+    'PAGE_SIZE': 10
 }
 
 EMAIL_USE_TLS = True

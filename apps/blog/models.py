@@ -1,5 +1,7 @@
 from django.db import models
 from django_editorjs_fields import EditorJsJSONField
+from taggit.managers import TaggableManager
+
 from apps.users.models import User
 
 
@@ -22,8 +24,13 @@ class Article(models.Model):
         default=StatusChoices.DRAFT
     )
 
+    tags = TaggableManager(blank=True)
+
     class Meta:
         ordering = ('-created_at',)
+
+    def get_tags_display(self):
+        return self.tags.values_list('name', flat=True)
 
     def __str__(self):
         return self.title
