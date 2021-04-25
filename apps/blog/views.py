@@ -1,8 +1,11 @@
 from django.db.models import Count, Prefetch, Subquery
 from django.db.models.expressions import OuterRef
+from django.views.generic import DetailView
 
 from rest_framework import permissions, viewsets
+from rest_framework.generics import get_object_or_404
 
+from apps.blog.filters import TagsFilter
 from apps.blog.models import Article, Comment
 from apps.blog.serializers import *
 from apps.blog.permissions import IsOwner
@@ -35,7 +38,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Вьюсет статьи
+    возможно передать в параметрах значение тега для фильтра статей
+    при нескольких значениях для фильтра - в формате или-или
     """
+    filter_backends = (TagsFilter,)
+    search_fields = ('tags__name',)
+
     queryset = Article.objects.annotate(
         comments_count=Count('article_comments')
     )

@@ -51,6 +51,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     previous_article_id = serializers.IntegerField(read_only=True)
     next_article_id = serializers.IntegerField(read_only=True)
     tags = StringListField()
+    similar_articles = serializers.ListField(read_only=True)
 
     class Meta:
         model = Article
@@ -65,6 +66,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             'tags',
             'previous_article_id',
             'next_article_id',
+            'similar_articles',
         )
 
     def create(self, validated_data):
