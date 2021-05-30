@@ -49,6 +49,12 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
     )
     permission_classes = (permissions.AllowAny,)
 
+    # def get_similar_articles(self):
+    #     similar_articles = self.get_object().tags.similar_objects()
+    #     return similar_articles
+    #
+    # similar_articles = get_similar_articles(self)
+
     def get_queryset(self):
         queryset = super().get_queryset()
 

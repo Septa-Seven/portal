@@ -141,6 +141,8 @@ SITE_NAME = 'Septa Cup'
 
 BACKEND_DOMAIN = env('BACKEND_DOMAIN')
 
+TEAM_SIZE = env('TEAM_SIZE')
+
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
