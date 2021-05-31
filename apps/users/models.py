@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
 
 
 class Team(models.Model):
@@ -9,7 +8,7 @@ class Team(models.Model):
     leader = models.OneToOneField(
         to='User',
         on_delete=models.CASCADE,
-        related_name='leader'
+        related_name='leading_team'
     )
 
     def __str__(self):
@@ -17,13 +16,8 @@ class Team(models.Model):
 
     def save(self, *args, **kwargs):
         self.leader.team = self
-        self.leader.is_leader = True
-        super(Team, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         self.leader.save()
-
-    def delete(self, *args, **kwargs):
-        self.leader.is_leader = False
-        super(Team, self).delete(*args, **kwargs)
 
 
 class User(AbstractUser):
@@ -35,7 +29,6 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         related_name='users'
     )
-    is_leader = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
@@ -45,10 +38,10 @@ class Invitation(models.Model):
     team = models.ForeignKey(
         to=Team,
         on_delete=models.CASCADE,
-        related_name='invitations'
+        related_name='invitations',
     )
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
-        related_name='invitations'
+        related_name='invitations',
     )

@@ -1,9 +1,8 @@
 from rest_framework import permissions, viewsets
 
-from apps.users.filters import UsersWithoutTeamFilter
 from apps.users.models import *
-from apps.users.permissions import IsLeader, HasNoTeam, IsInvited
-from apps.users.serializers import UserSerializer, TeamSerializer, InvitationSerializer
+from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
+from apps.users.serializers import TeamSerializer, InvitationSerializer
 
 
 class TeamViewSet(viewsets.ModelViewSet):
@@ -29,10 +28,9 @@ class TeamViewSet(viewsets.ModelViewSet):
         return [permission_class() for permission_class in permission_classes]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(leader=self.request.user)
 
 
-# TODO ?permissions ?qs filter
 class InvitationViewSet(viewsets.ModelViewSet):
     """
     Вьюсет приглашения.
@@ -41,7 +39,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
     retrieve доступен адресату и лидеру команды;
     create, delete - лидеру команды.
     """
-    filter_backends = (UsersWithoutTeamFilter,)
+
     queryset = Invitation.objects.all()
     serializer_class = InvitationSerializer
 
@@ -49,13 +47,20 @@ class InvitationViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [IsLeader]
         elif self.action == 'retrieve':
-            permission_classes = [IsLeader | IsInvited]
-        elif self.action == 'list':
-            permission_classes = [permissions.IsAdminUser | IsInvited]
+            permission_classes = [IsInviter | IsInvited]
+        elif self.action == 'delete':
+            permission_classes = [permissions.IsAdminUser | IsInviter]
         else:
-            permission_classes = [permissions.IsAdminUser | IsLeader]
+            permission_classes = [permissions.IsAuthenticated]
 
         return [permission_class() for permission_class in permission_classes]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            queryset = queryset.filter(user=self.request.user)
+
+        return queryset
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(team=self.request.user.team)
