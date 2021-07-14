@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.users.models import Team, Invitation
+from apps.users.models import Team, Invitation, User
 
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -13,9 +13,18 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class InvitationSerializer(serializers.ModelSerializer):
-
     team = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Invitation
         fields = ('id', 'team', 'user',)
+
+    def validate_user(self, user):
+        if user.team:
+            raise serializers.ValidationError('User already has a team')
+        return user
+
+    # def accept_invitation(self, user):
+    #     pass
+    #
+    # def decline_invitation

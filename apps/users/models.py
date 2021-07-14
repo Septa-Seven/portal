@@ -45,3 +45,9 @@ class Invitation(models.Model):
         on_delete=models.CASCADE,
         related_name='invitations',
     )
+
+    class Meta:
+        db_table = 'users_invitation'
+        constraints = [
+            models.UniqueConstraint(fields=['team', 'user'], name='unique invitation')
+        ]
