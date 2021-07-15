@@ -23,8 +23,3 @@ class InvitationSerializer(serializers.ModelSerializer):
         if user.team:
             raise serializers.ValidationError('User already has a team')
         return user
-
-    # def accept_invitation(self, user):
-    #     pass
-    #
-    # def decline_invitation

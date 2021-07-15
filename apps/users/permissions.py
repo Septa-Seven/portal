@@ -12,9 +12,6 @@ class IsLeader(permissions.BasePermission):
 
 class IsInvited(permissions.BasePermission):
     def has_object_permission(self, request, view, invitation):
-        print('this print from permission')
-        print(invitation.user)
-        print(request.user)
         return invitation.user == request.user
 
 

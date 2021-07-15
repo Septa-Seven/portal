@@ -47,21 +47,15 @@ class InvitationViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            print(self.action)
             permission_classes = [IsLeader]
         elif self.action == 'retrieve':
             permission_classes = [IsInviter | IsInvited]
-            print(self.action)
         elif self.action == 'delete':
-            permission_classes = [permissions.IsAdminUser | IsInviter]
+            permission_classes = [permissions.IsAdminUser | IsInviter | IsInvited]
         elif self.action == 'accept':
             permission_classes = [IsInvited | HasNoTeam]
-        elif self.action == 'decline':
-            permission_classes = [IsInvited]
         else:
             permission_classes = [permissions.IsAuthenticated]
-            print(self.action)
-            print(permission_classes)
 
         return [permission_class() for permission_class in permission_classes]
 
@@ -77,24 +71,13 @@ class InvitationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def accept(self, request, *args, **kwargs):
-        instance = self.get_object()
-        print('this print from view action accept')
-        serializer = self.get_serializer(instance)
-        print('serializer data', serializer.data)
-        user = User.objects.get(id=serializer.data['user'])
-        team = Team.objects.get(id=serializer.data['team'])
-        user.team = team
-        user.save()
-        invitation = Invitation.objects.get(id=serializer.data['id'])
-        invitation.delete()
-        return Response(serializer.data)
+        invitation = self.get_object()
+        serializer = self.get_serializer(invitation)
 
-    @action(detail=True, methods=['post'])
-    def decline(self, request, pk=None):
-        instance = self.get_object()
-        print('this print from view action decline')
-        serializer = self.get_serializer(instance)
-        print('serializer data', serializer.data)
-        invitation = Invitation.objects.get(id=serializer.data['id'])
+        user = invitation.user
+        user.team = invitation.team
+        user.save()
+
         invitation.delete()
+
         return Response(serializer.data)
