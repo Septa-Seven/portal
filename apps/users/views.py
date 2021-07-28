@@ -1,3 +1,4 @@
+from django.db.models import Count, When, Case, BooleanField
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -5,6 +6,7 @@ from rest_framework.response import Response
 from apps.users.models import *
 from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
 from apps.users.serializers import TeamSerializer, InvitationSerializer
+from septacup_backend.settings import TEAM_SIZE
 
 
 class TeamViewSet(viewsets.ModelViewSet):
@@ -14,7 +16,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     create - авторизованному пользователю без команды;
     delete - лидеру команды или администратору.
     """
-    queryset = Team.objects.all()
+    queryset = Team.objects.prefetch_related('users').annotate(members_count=Count('users'))
     serializer_class = TeamSerializer
 
     def get_permissions(self):
@@ -39,10 +41,19 @@ class InvitationViewSet(viewsets.ModelViewSet):
     полный list доступен администратору;
     частичный list доступен адресату и лидеру команды;
     retrieve доступен адресату и лидеру команды;
-    create, delete - лидеру команды.
+    create - лидеру команды;
+    accept - приглашенному без команды;
+    delete - лидеру, приглашенному или администратору.
     """
-
-    queryset = Invitation.objects.all()
+    team_size = int(TEAM_SIZE)
+    queryset = Invitation.objects.prefetch_related('team').annotate(
+        count=Count('team__users'),
+        active=Case(
+            When(count__lt=team_size, then=True),
+            When(count__gte=team_size, then=False),
+            output_field=BooleanField()
+        )
+    )
     serializer_class = InvitationSerializer
 
     def get_permissions(self):
@@ -53,7 +64,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
         elif self.action == 'delete':
             permission_classes = [permissions.IsAdminUser | IsInviter | IsInvited]
         elif self.action == 'accept':
-            permission_classes = [IsInvited | HasNoTeam]
+            permission_classes = [IsInvited & HasNoTeam]
         else:
             permission_classes = [permissions.IsAuthenticated]
 

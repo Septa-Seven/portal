@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 class Team(models.Model):
     name = models.CharField(null=False, unique=True, max_length=200)
     description = models.TextField(blank=True)
+    rating = models.FloatField(null=False, default=0)
     leader = models.OneToOneField(
         to='User',
         on_delete=models.CASCADE,
@@ -47,7 +48,6 @@ class Invitation(models.Model):
     )
 
     class Meta:
-        db_table = 'users_invitation'
         constraints = [
             models.UniqueConstraint(fields=['team', 'user'], name='unique invitation')
         ]
