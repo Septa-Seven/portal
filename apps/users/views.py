@@ -1,10 +1,10 @@
 from django.db.models import Count, When, Case, BooleanField
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.users.models import *
-from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
+from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter, IsMember
 from apps.users.serializers import TeamSerializer, InvitationSerializer
 from septacup_backend.settings import TEAM_SIZE
 
@@ -14,6 +14,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     Вьюсет команды.
     list, retrieve доступен авторизованным пользователям;
     create - авторизованному пользователю без команды;
+    update - участнику или лидеру команды;
     delete - лидеру команды или администратору.
     """
     queryset = Team.objects.prefetch_related('users').annotate(members_count=Count('users'))
@@ -26,6 +27,8 @@ class TeamViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         elif self.action == 'list':
             permission_classes = [permissions.IsAuthenticated]
+        elif self.action == 'update':
+            permission_classes = [IsMember]
         else:
             permission_classes = [permissions.IsAdminUser | IsLeader]
 
@@ -33,6 +36,20 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(leader=self.request.user)
+
+    @action(detail=True, methods=['put'])
+    def quit(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        if user.team.leader != user:
+            user.team = None
+            user.save()
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class InvitationViewSet(viewsets.ModelViewSet):

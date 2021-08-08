@@ -10,6 +10,11 @@ class IsLeader(permissions.BasePermission):
         return False
 
 
+class IsMember(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user.team == obj
+
+
 class IsInvited(permissions.BasePermission):
     def has_object_permission(self, request, view, invitation):
         return invitation.user == request.user

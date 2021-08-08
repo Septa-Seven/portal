@@ -2,7 +2,7 @@ from django.db.models import Count, Prefetch, Subquery
 from django.db.models.expressions import OuterRef
 from django.views.generic import DetailView
 
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, viewsets, mixins
 from rest_framework.generics import get_object_or_404
 
 from apps.blog.filters import TagsFilter
@@ -11,12 +11,14 @@ from apps.blog.serializers import *
 from apps.blog.permissions import IsOwner
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
+                     viewsets.GenericViewSet):
     """
     Вьюсет комментария.
-    list, retrieve доступен всем (даже неавторизованным);
-    create - авторизованному пользователю;
-    delete - владельцу комментария.
+    list, retrieve отдельно нет, комменты только под статьями;
+    create -  доступен авторизованному пользователю;
+    delete -  доступен админу или владельцу комментария.
     """
     queryset = Comment.objects.filter(active=True)
     serializer_class = CommentSerializer
@@ -26,8 +28,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         elif self.action == 'delete':
             permission_classes = [permissions.IsAdminUser | IsOwner]
-        else:
-            permission_classes = [permissions.AllowAny]
 
         return [permission_class() for permission_class in permission_classes]
 
