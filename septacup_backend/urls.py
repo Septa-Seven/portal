@@ -24,6 +24,7 @@ schema_view = get_schema_view(
 api_urlpatterns = [
     path('users/', include('apps.users.urls')),
     path('blog/', include('apps.blog.urls')),
+    # path('matchmaking/', include('apps.matchmaking.urls')),
 ]
 
 urlpatterns = [

@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Team(models.Model):
+    matchmaking_id = models.IntegerField(unique=True)
     name = models.CharField(null=False, unique=True, max_length=200)
     description = models.TextField(blank=True)
     rating = models.FloatField(null=False, default=0)

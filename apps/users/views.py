@@ -1,10 +1,12 @@
 from django.db.models import Count, When, Case, BooleanField
-from rest_framework import permissions, viewsets, status
+from rest_framework import permissions, viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
 from apps.users.models import *
-from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter, IsMember
+from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
 from apps.users.serializers import TeamSerializer, InvitationSerializer
 from septacup_backend.settings import TEAM_SIZE
 
@@ -28,7 +30,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         elif self.action == 'list':
             permission_classes = [permissions.IsAuthenticated]
         elif self.action == 'update':
-            permission_classes = [IsMember]
+            permission_classes = [IsLeader]
         else:
             permission_classes = [permissions.IsAdminUser | IsLeader]
 
@@ -36,20 +38,6 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(leader=self.request.user)
-
-    @action(detail=True, methods=['put'])
-    def quit(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        user = request.user
-        if user.team.leader != user:
-            user.team = None
-            user.save()
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class InvitationViewSet(viewsets.ModelViewSet):
@@ -109,3 +97,22 @@ class InvitationViewSet(viewsets.ModelViewSet):
         invitation.delete()
 
         return Response(serializer.data)
+
+
+class DetailUser(APIView):
+    """
+    Is used to quit the team.
+    In case the user is leader, team will be deleted
+    """
+    def put(self, request):
+        user = request.user
+
+        if user.team:
+            if user.team.leader == user:
+                user.team.delete()
+            else:
+                user.team = None
+                user.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'taggit',
     'apps.users.apps.UsersConfig',
     'apps.blog.apps.BlogConfig',
+    'apps.matchmaking.apps.MatchmakingConfig',
 ]
 
 
@@ -142,6 +143,8 @@ SITE_NAME = 'Septa Cup'
 BACKEND_DOMAIN = env('BACKEND_DOMAIN')
 
 TEAM_SIZE = env('TEAM_SIZE')
+MATCHMAKING_API_KEY = env('MATCHMAKING_API_KEY')
+MATCHMAKING_URL = env('MATCHMAKING_URL')
 
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
