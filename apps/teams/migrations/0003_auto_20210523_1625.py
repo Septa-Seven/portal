@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_unique_required_email'),
+        ('teams', '0002_unique_required_email'),
     ]
 
     operations = [
@@ -30,13 +30,13 @@ class Migration(migrations.Migration):
             name='Invitation',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.team', verbose_name='invitations')),
+                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='teams.team', verbose_name='invitations')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='invitations')),
             ],
         ),
         migrations.AddField(
             model_name='user',
             name='team',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='users.team', verbose_name='users'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='teams.team', verbose_name='users'),
         ),
     ]

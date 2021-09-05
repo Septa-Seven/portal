@@ -2,7 +2,7 @@ from django.db import models
 from django_editorjs_fields import EditorJsJSONField
 from taggit.managers import TaggableManager
 
-from apps.users.models import User
+from apps.teams.models import User
 
 
 class Article(models.Model):

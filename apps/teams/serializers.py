@@ -1,6 +1,7 @@
+import requests
 from rest_framework import serializers
 
-from apps.users.models import Team, Invitation, User
+from apps.teams.models import Team, Invitation
 
 
 class TeamSerializer(serializers.ModelSerializer):

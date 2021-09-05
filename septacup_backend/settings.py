@@ -25,7 +25,7 @@ environ.Env.read_env(str(BASE_DIR / '.env'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'teams.User'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'django_editorjs_fields',
     'corsheaders',
     'taggit',
-    'apps.users.apps.UsersConfig',
+    'apps.teams.apps.TeamsConfig',
     'apps.blog.apps.BlogConfig',
     'apps.matchmaking.apps.MatchmakingConfig',
 ]

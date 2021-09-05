@@ -3,11 +3,13 @@ from rest_framework import permissions, viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
 
-from apps.users.models import *
-from apps.users.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
-from apps.users.serializers import TeamSerializer, InvitationSerializer
+import requests
+
+from apps.teams.models import *
+from apps.teams.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
+from apps.teams.serializers import TeamSerializer, InvitationSerializer, TeamShortSerializer
+from septacup_backend import settings
 from septacup_backend.settings import TEAM_SIZE
 
 
@@ -20,7 +22,13 @@ class TeamViewSet(viewsets.ModelViewSet):
     delete - лидеру команды или администратору.
     """
     queryset = Team.objects.prefetch_related('users').annotate(members_count=Count('users'))
-    serializer_class = TeamSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'list':
+            serializer_class = TeamShortSerializer
+        else:
+            serializer_class = TeamSerializer
+        return serializer_class
 
     def get_permissions(self):
         if self.action == 'create':
@@ -36,8 +44,54 @@ class TeamViewSet(viewsets.ModelViewSet):
 
         return [permission_class() for permission_class in permission_classes]
 
-    def perform_create(self, serializer):
-        serializer.save(leader=self.request.user)
+    def create(self, request, *args, **kwargs):
+        response = requests.post(
+            url=f'{settings.MATCHMAKING_URL}/players',
+            headers={'API-Key': settings.MATCHMAKING_API_KEY}
+        )
+        data = response.json()
+        data['name'] = request.data['name']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer, data['id'])
+
+        headers = self.get_success_headers(serializer.data)
+        data = {'password': data['password'], **serializer.data}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, team_id):
+        serializer.save(leader=self.request.user, id=team_id)
+
+    def perform_destroy(self, instance):
+        requests.delete(
+            url=f'{settings.MATCHMAKING_URL}/players/{instance.id}',
+            headers={'API-Key': settings.MATCHMAKING_API_KEY}
+        )
+        super().perform_destroy(instance)
+
+    @action(detail=True, methods=['put'])
+    def reset_password(self, request, *args, **kwargs):
+        response = requests.put(
+            url=f'{settings.MATCHMAKING_URL}/players/reset_password',
+            headers={'API-Key': settings.MATCHMAKING_API_KEY}
+        )
+        data = response.json()
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['put'])
+    def quit(self, request):
+        user = request.user
+
+        if user.team:
+            if user.team.leader == user:
+                user.team.delete()
+            else:
+                user.team = None
+                user.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class InvitationViewSet(viewsets.ModelViewSet):
@@ -97,22 +151,3 @@ class InvitationViewSet(viewsets.ModelViewSet):
         invitation.delete()
 
         return Response(serializer.data)
-
-
-class DetailUser(APIView):
-    """
-    Is used to quit the team.
-    In case the user is leader, team will be deleted
-    """
-    def put(self, request):
-        user = request.user
-
-        if user.team:
-            if user.team.leader == user:
-                user.team.delete()
-            else:
-                user.team = None
-                user.save()
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
