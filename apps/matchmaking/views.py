@@ -46,11 +46,12 @@ class GamesRetrieveView(APIView):
 class GamesListView(APIView):
 
     def get(self, request, format=None):
-
+        params = {}
         if 'player_id' in request.query_params:
-            params = request.query_params['player_id']
-        else:
-            params = None
+            params['player_id'] = request.query_params['player_id']
+        if 'page' in request.query_params and 'size' in request.query_params:
+            params['page'] = request.query_params['page']
+            params['size'] = request.query_params['size']
         try:
             response = requests.get(
                 url=f'{settings.MATCHMAKING_URL}/games',

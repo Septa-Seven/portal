@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 import requests
 
+from apps.matchmaking.views import retrieve_team
 from apps.teams.models import *
 from apps.teams.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
 from apps.teams.serializers import TeamSerializer, InvitationSerializer, TeamShortSerializer
@@ -92,6 +93,16 @@ class TeamViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def list(self, request, *args, **kwargs):
+        response = requests.get(
+            url=f'{settings.MATCHMAKING_URL}/players/',
+            headers={'API-Key': settings.MATCHMAKING_API_KEY}
+        )
+        data = response.json()
+        for team in data:
+            team.update(retrieve_team(team['id']))
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class InvitationViewSet(viewsets.ModelViewSet):
