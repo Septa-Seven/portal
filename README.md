@@ -24,6 +24,7 @@ docker-compose -f docker-compose.dev.yml run septa-backend python manage.py crea
 
 # Environment variables
 
+<<<<<<< HEAD
 Store environment variables in **_.env_** file or in shell.
 
 ## [Django settings](https://docs.djangoproject.com/en/3.1/ref/settings/)
@@ -102,3 +103,6 @@ _MEDIA_URL = BACKEND_DOMAIN + /media/_
 ```dotenv
 BACKEND_DOMAIN=<>
 ```
+=======
+
+>>>>>>> articles+comments

@@ -27,7 +27,7 @@ environ.Env.read_env(str(BASE_DIR / '.env'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'teams.User'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
@@ -52,9 +52,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_editorjs_fields',
     'corsheaders',
-    'apps.users.apps.UsersConfig',
-    'apps.articles.apps.ArticlesConfig',
-    'apps.comments.apps.CommentsConfig',
+    'taggit',
+    'apps.teams.apps.TeamsConfig',
+    'apps.blog.apps.BlogConfig',
+    'apps.matchmaking.apps.MatchmakingConfig',
 ]
 
 
@@ -128,7 +129,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 2
+    'PAGE_SIZE': 10
 }
 
 EMAIL_USE_TLS = True
@@ -142,6 +143,10 @@ DOMAIN = env('DOMAIN')
 SITE_NAME = 'Septa'
 
 BACKEND_DOMAIN = env('BACKEND_DOMAIN')
+
+TEAM_SIZE = env('TEAM_SIZE')
+MATCHMAKING_API_KEY = env('MATCHMAKING_API_KEY')
+MATCHMAKING_URL = env('MATCHMAKING_URL')
 
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',

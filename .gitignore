@@ -3,5 +3,7 @@
 media/
 static/
 venv/
-*__pycache__*
+uploads/
 .idea
+*.pyc
+*/__pycache__/*
