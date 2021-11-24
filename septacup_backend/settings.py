@@ -48,11 +48,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'rest_framework',
-    'djoser',
+    # 'djoser',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
     'django_editorjs_fields',
     'corsheaders',
     'taggit',
+    'apps.auth.apps.AuthConfig',
     'apps.teams.apps.TeamsConfig',
     'apps.blog.apps.BlogConfig',
     'apps.matchmaking.apps.MatchmakingConfig',
@@ -141,6 +149,7 @@ EMAIL_PORT = env('EMAIL_PORT')
 # Backend domain to construct letters
 DOMAIN = env('DOMAIN')
 SITE_NAME = 'Septa'
+SITE_ID = 1
 
 BACKEND_DOMAIN = env('BACKEND_DOMAIN')
 
@@ -148,15 +157,17 @@ TEAM_SIZE = env('TEAM_SIZE')
 MATCHMAKING_API_KEY = env('MATCHMAKING_API_KEY')
 MATCHMAKING_URL = env('MATCHMAKING_URL')
 
-DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
-    'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': 'activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
-    'SERIALIZERS': {},
-    'TOKEN_MODEL': None
-}
-
+# DJOSER = {
+#     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+#     'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
+#     'ACTIVATION_URL': 'activate/{uid}/{token}',
+#     'SEND_ACTIVATION_EMAIL': True,
+#     'SERIALIZERS': {},
+#     'TOKEN_MODEL': None
+# }
+REST_USE_JWT = True
+# JWT_AUTH_RETURN_EXPIRATION
+REST_SESSION_LOGIN = False
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=env('ACCESS_TOKEN_LIFETIME', default=15)),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),

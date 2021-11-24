@@ -25,13 +25,16 @@ api_urlpatterns = [
     path('teams/', include('apps.teams.urls')),
     path('blog/', include('apps.blog.urls')),
     path('matchmaking/', include('apps.matchmaking.urls')),
+    path('auth/', include('apps.auth.urls')),
 ]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(api_urlpatterns)),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
+    # path('auth/', include('djoser.urls')),
+    # path('auth/', include('djoser.urls.jwt')),
+    path('dj-rest-auth/', include('dj_rest_auth.urls')),
+    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     path('editorjs/', include('django_editorjs_fields.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
