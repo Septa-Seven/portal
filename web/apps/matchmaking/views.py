@@ -35,6 +35,7 @@ class GamesRetrieveView(APIView):
             )
         except ConnectionError:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         if response.status_code == 200:
             game = response.json()
             game = handle_game(game)
@@ -47,11 +48,14 @@ class GamesListView(APIView):
 
     def get(self, request, format=None):
         params = {}
+
         if 'player_id' in request.query_params:
             params['player_id'] = request.query_params['player_id']
+
         if 'page' in request.query_params and 'size' in request.query_params:
             params['page'] = request.query_params['page']
             params['size'] = request.query_params['size']
+
         try:
             response = requests.get(
                 url=f'{settings.MATCHMAKING_URL}/games',
@@ -59,6 +63,8 @@ class GamesListView(APIView):
             )
         except ConnectionError:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         games = response.json()
         games = [handle_game(game) for game in games]
+
         return Response(games)

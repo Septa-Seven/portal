@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=bool,
 )
-environ.Env.read_env(str(BASE_DIR / '.env'))
+environ.Env.read_env(str(BASE_DIR / '.test.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -48,15 +48,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'rest_framework',
-    # 'djoser',
-    'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'dj_rest_auth',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
     'dj_rest_auth.registration',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
     'django_editorjs_fields',
     'corsheaders',
     'taggit',
@@ -65,7 +64,6 @@ INSTALLED_APPS = [
     'apps.blog.apps.BlogConfig',
     'apps.matchmaking.apps.MatchmakingConfig',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -131,10 +129,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+import dj_rest_auth.jwt_auth.JWTCookieAuthentication
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
@@ -146,7 +144,7 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env('EMAIL_PORT')
 
-# Backend domain to construct letters
+# Frontend domain to construct letters
 DOMAIN = env('DOMAIN')
 SITE_NAME = 'Septa'
 SITE_ID = 1
@@ -157,17 +155,13 @@ TEAM_SIZE = env('TEAM_SIZE')
 MATCHMAKING_API_KEY = env('MATCHMAKING_API_KEY')
 MATCHMAKING_URL = env('MATCHMAKING_URL')
 
-# DJOSER = {
-#     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
-#     'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
-#     'ACTIVATION_URL': 'activate/{uid}/{token}',
-#     'SEND_ACTIVATION_EMAIL': True,
-#     'SERIALIZERS': {},
-#     'TOKEN_MODEL': None
-# }
+# TODO: Email activation
+
+# Enable JWT and disable sessions and rest_framework tokens
 REST_USE_JWT = True
-# JWT_AUTH_RETURN_EXPIRATION
 REST_SESSION_LOGIN = False
+REST_AUTH_TOKEN_MODEL = None
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=env('ACCESS_TOKEN_LIFETIME', default=15)),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
@@ -201,6 +195,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Authentication
+GITHUB_CALLBACK_URL = DOMAIN + '/github_callback'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'APP': {
+            'client_id': env('GITHUB_AUTH_CLIENT_ID'),
+            'secret': env('GITHUB_AUTH_SECRET'),
+            'key': ''
+        }
+    }
+}
 
 # AWS specific settings
 

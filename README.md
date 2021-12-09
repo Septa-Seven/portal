@@ -7,8 +7,8 @@ docker-compose -f docker-compose.dev.yml build
 
 Collect static files and run migrations:
 ```commandline
-docker-compose -f docker-compose.dev.yml run septa-backend python manage.py collectstatic
-docker-compose -f docker-compose.dev.yml run septa-backend python manage.py migrate
+docker-compose -f docker-compose.dev.yml run web python manage.py migrate
+docker-compose -f docker-compose.dev.yml run web python manage.py collectstatic
 ```
 
 Run in detach mode:
@@ -18,13 +18,12 @@ docker-compose -f docker-compose.dev.yml up -d
 
 Create superuser without input (see [environment variables](#superuser))
 ```commandline
-docker-compose -f docker-compose.dev.yml run septa-backend python manage.py createsuperuser --no-input
+docker-compose -f docker-compose.dev.yml run web python manage.py createsuperuser --no-input
 ```
 
 
 # Environment variables
 
-<<<<<<< HEAD
 Store environment variables in **_.env_** file or in shell.
 
 ## [Django settings](https://docs.djangoproject.com/en/3.1/ref/settings/)
@@ -103,6 +102,3 @@ _MEDIA_URL = BACKEND_DOMAIN + /media/_
 ```dotenv
 BACKEND_DOMAIN=<>
 ```
-=======
-
->>>>>>> articles+comments

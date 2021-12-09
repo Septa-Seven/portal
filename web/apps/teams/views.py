@@ -1,8 +1,7 @@
 from django.db.models import Count, When, Case, BooleanField
-from rest_framework import permissions, viewsets, status, mixins
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 import requests
 
@@ -10,8 +9,7 @@ from apps.matchmaking.views import retrieve_team
 from apps.teams.models import *
 from apps.teams.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
 from apps.teams.serializers import TeamSerializer, InvitationSerializer, TeamShortSerializer
-from septacup_backend import settings
-from septacup_backend.settings import TEAM_SIZE
+from django.conf import settings
 
 
 class TeamViewSet(viewsets.ModelViewSet):
@@ -115,12 +113,11 @@ class InvitationViewSet(viewsets.ModelViewSet):
     accept - приглашенному без команды;
     delete - лидеру, приглашенному или администратору.
     """
-    team_size = int(TEAM_SIZE)
     queryset = Invitation.objects.prefetch_related('team').annotate(
         count=Count('team__users'),
         active=Case(
-            When(count__lt=team_size, then=True),
-            When(count__gte=team_size, then=False),
+            When(count__lt=settings.team_size, then=True),
+            When(count__gte=settings.team_size, then=False),
             output_field=BooleanField()
         )
     )

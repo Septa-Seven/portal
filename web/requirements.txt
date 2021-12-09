@@ -1,0 +1,17 @@
+boto3
+celery
+dj-rest-auth
+Django
+django-allauth
+django-cors-headers
+django-editorjs-fields
+django-environ
+django-s3-storage
+django-taggit
+django-templated-mail
+djangorestframework
+djangorestframework-simplejwt
+drf-yasg
+gunicorn
+psycopg2
+requests
