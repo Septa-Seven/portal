@@ -29,6 +29,9 @@ class CommentViewSet(mixins.CreateModelMixin,
         elif self.action == 'delete':
             permission_classes = [permissions.IsAdminUser | IsOwner]
 
+        # TODO: permission_classes referenced before assignment on GET
+        #  but get must be 404 before get_permissions
+
         return [permission_class() for permission_class in permission_classes]
 
     def perform_create(self, serializer):

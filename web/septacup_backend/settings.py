@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=bool,
 )
-environ.Env.read_env(str(BASE_DIR / '.test.env'))
+environ.Env.read_env(str(BASE_DIR / '.env.dev'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.vk',
+    'allauth.socialaccount.providers.google',
     'django_editorjs_fields',
     'corsheaders',
     'taggit',
@@ -129,10 +131,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-import dj_rest_auth.jwt_auth.JWTCookieAuthentication
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
@@ -155,23 +156,56 @@ TEAM_SIZE = env('TEAM_SIZE')
 MATCHMAKING_API_KEY = env('MATCHMAKING_API_KEY')
 MATCHMAKING_URL = env('MATCHMAKING_URL')
 
+
+# dj-rest-auth
+
+# Social authentication (allauth)
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'APP': {
+            'client_id': env('GITHUB_AUTH_CLIENT_ID'),
+            'secret': env('GITHUB_AUTH_SECRET'),
+            'key': ''
+        }
+    },
+    'vk': {
+        'APP': {
+            'client_id': env('VK_AUTH_CLIENT_ID'),
+            'secret': env('VK_AUTH_SECRET'),
+            'key': '',
+        }
+    },
+    'google': {
+        'APP': {
+            'client_id': env('GOOGLE_AUTH_CLIENT_ID'),
+            'secret': env('GOOGLE_AUTH_SECRET'),
+            'key': '',
+        }
+    }
+}
+
+GITHUB_CALLBACK_URL = DOMAIN + '/github_callback'
+VK_CALLBACK_URL = DOMAIN + '/vk_callback'
+GOOGLE_CALLBACK_URL = DOMAIN + '/google_callback'
+
 # TODO: Email activation
 
-# Enable JWT and disable sessions and rest_framework tokens
+# JWT (enable rest_framework_simplejwt)
 REST_USE_JWT = True
-REST_SESSION_LOGIN = False
-REST_AUTH_TOKEN_MODEL = None
 
+# dj-rest-auth uses ACCESS_TOKEN_LIFETIME and REFRESH_TOKEN_LIFETIME
+# from SIMPLE_JWT settings if REST_USE_JWT is True
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=env('ACCESS_TOKEN_LIFETIME', default=15)),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(
+        minutes=env('ACCESS_TOKEN_LIFETIME', default=15)
+    ),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('JWT',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -185,7 +219,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
@@ -195,18 +228,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Authentication
-GITHUB_CALLBACK_URL = DOMAIN + '/github_callback'
-
-SOCIALACCOUNT_PROVIDERS = {
-    'github': {
-        'APP': {
-            'client_id': env('GITHUB_AUTH_CLIENT_ID'),
-            'secret': env('GITHUB_AUTH_SECRET'),
-            'key': ''
-        }
-    }
-}
 
 # AWS specific settings
 

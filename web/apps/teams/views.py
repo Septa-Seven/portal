@@ -50,6 +50,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         )
         data = response.json()
         data['name'] = request.data['name']
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
@@ -88,9 +89,10 @@ class TeamViewSet(viewsets.ModelViewSet):
             else:
                 user.team = None
                 user.save()
+
             return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request, *args, **kwargs):
         response = requests.get(
@@ -98,8 +100,10 @@ class TeamViewSet(viewsets.ModelViewSet):
             headers={'API-Key': settings.MATCHMAKING_API_KEY}
         )
         data = response.json()
+
         for team in data:
             team.update(retrieve_team(team['id']))
+
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -116,8 +120,8 @@ class InvitationViewSet(viewsets.ModelViewSet):
     queryset = Invitation.objects.prefetch_related('team').annotate(
         count=Count('team__users'),
         active=Case(
-            When(count__lt=settings.team_size, then=True),
-            When(count__gte=settings.team_size, then=False),
+            When(count__lt=settings.TEAM_SIZE, then=True),
+            When(count__gte=settings.TEAM_SIZE, then=False),
             output_field=BooleanField()
         )
     )

@@ -4,7 +4,7 @@ from apps.blog import views
 
 router = SimpleRouter()
 
-router.register('article', views.ArticleViewSet)
-router.register('comment', views.CommentViewSet)
+router.register('articles', views.ArticleViewSet)
+router.register('comments', views.CommentViewSet)
 
 urlpatterns = router.urls

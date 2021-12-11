@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 
 import requests
 
-from septacup_backend import settings
+from django.conf import settings
 from apps.teams.models import Team
 
 
