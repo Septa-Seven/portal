@@ -13,6 +13,7 @@ def retrieve_team(team_id):
         team = Team.objects.values('id', 'name').get(pk=team_id)
     except Team.DoesNotExist:
         team = {'id': team_id, 'name': 'deleted'}
+
     return team
 
 

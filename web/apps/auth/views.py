@@ -7,6 +7,7 @@ from django.conf import settings
 
 
 class GithubLogin(SocialLoginView):
+    # TODO: Handle issue: https://github.com/iMerica/dj-rest-auth/issues/275
     adapter_class = GitHubOAuth2Adapter
     client_class = OAuth2Client
 

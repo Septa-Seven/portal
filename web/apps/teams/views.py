@@ -20,7 +20,11 @@ class TeamViewSet(viewsets.ModelViewSet):
     update - участнику или лидеру команды;
     delete - лидеру команды или администратору.
     """
-    queryset = Team.objects.prefetch_related('users').annotate(members_count=Count('users'))
+    queryset = Team.objects.prefetch_related(
+        'users'
+    ).annotate(
+        members_count=Count('users')
+    )
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'list':
@@ -44,6 +48,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         return [permission_class() for permission_class in permission_classes]
 
     def create(self, request, *args, **kwargs):
+        # TODO: Handle requests exception
         response = requests.post(
             url=f'{settings.MATCHMAKING_URL}/players',
             headers={'API-Key': settings.MATCHMAKING_API_KEY}
@@ -64,6 +69,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         serializer.save(leader=self.request.user, id=team_id)
 
     def perform_destroy(self, instance):
+        # TODO: Handle requests exception
         requests.delete(
             url=f'{settings.MATCHMAKING_URL}/players/{instance.id}',
             headers={'API-Key': settings.MATCHMAKING_API_KEY}
@@ -72,6 +78,7 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['put'])
     def reset_password(self, request, *args, **kwargs):
+        # TODO: Handle requests exception
         response = requests.put(
             url=f'{settings.MATCHMAKING_URL}/players/reset_password',
             headers={'API-Key': settings.MATCHMAKING_API_KEY}
@@ -95,6 +102,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request, *args, **kwargs):
+        # TODO: Handle requests exception
         response = requests.get(
             url=f'{settings.MATCHMAKING_URL}/players/',
             headers={'API-Key': settings.MATCHMAKING_API_KEY}
