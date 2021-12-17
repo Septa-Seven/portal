@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 
 import requests
 
-from septacup_backend import settings
+from django.conf import settings
 from apps.teams.models import Team
 
 
@@ -13,6 +13,7 @@ def retrieve_team(team_id):
         team = Team.objects.values('id', 'name').get(pk=team_id)
     except Team.DoesNotExist:
         team = {'id': team_id, 'name': 'deleted'}
+
     return team
 
 
@@ -35,6 +36,7 @@ class GamesRetrieveView(APIView):
             )
         except ConnectionError:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         if response.status_code == 200:
             game = response.json()
             game = handle_game(game)
@@ -47,11 +49,14 @@ class GamesListView(APIView):
 
     def get(self, request, format=None):
         params = {}
+
         if 'player_id' in request.query_params:
             params['player_id'] = request.query_params['player_id']
+
         if 'page' in request.query_params and 'size' in request.query_params:
             params['page'] = request.query_params['page']
             params['size'] = request.query_params['size']
+
         try:
             response = requests.get(
                 url=f'{settings.MATCHMAKING_URL}/games',
@@ -59,6 +64,8 @@ class GamesListView(APIView):
             )
         except ConnectionError:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         games = response.json()
         games = [handle_game(game) for game in games]
+
         return Response(games)

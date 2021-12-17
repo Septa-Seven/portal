@@ -1,5 +1,6 @@
 .env
-.test.env
+.env.dev
+.env.docker
 media/
 static/
 venv/

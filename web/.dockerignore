@@ -1,0 +1,6 @@
+.env
+.env.dev
+Dockerfile
+media
+static
+venv
