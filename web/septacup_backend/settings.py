@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'apps.teams.apps.TeamsConfig',
     'apps.blog.apps.BlogConfig',
     'apps.matchmaking.apps.MatchmakingConfig',
+    'apps.users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -154,7 +155,9 @@ BACKEND_DOMAIN = env('BACKEND_DOMAIN')
 
 TEAM_SIZE = env('TEAM_SIZE')
 MATCHMAKING_API_KEY = env('MATCHMAKING_API_KEY')
-MATCHMAKING_URL = env('MATCHMAKING_URL')
+MATCHMAKING_ADDRESS = env('MATCHMAKING_ADDRESS')
+MATCHMAKING_HTTP = f'http://{MATCHMAKING_ADDRESS}'
+MATCHMAKING_WS = f'ws://{MATCHMAKING_ADDRESS}'
 
 
 # dj-rest-auth

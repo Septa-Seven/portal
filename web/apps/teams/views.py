@@ -1,36 +1,43 @@
 from django.db.models import Count, When, Case, BooleanField
-from rest_framework import permissions, viewsets, status
+from rest_framework import permissions, viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-import requests
+from rest_framework.viewsets import GenericViewSet
 
-from apps.matchmaking.views import retrieve_team
+from utils import matchmaking, teams
 from apps.teams.models import *
 from apps.teams.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
-from apps.teams.serializers import TeamSerializer, InvitationSerializer, TeamShortSerializer
+from apps.teams.serializers import TeamSerializer, InvitationSerializer, \
+    TeamShortSerializer
 from django.conf import settings
 
 
-class TeamViewSet(viewsets.ModelViewSet):
-    """
-    Вьюсет команды.
-    list, retrieve доступен авторизованным пользователям;
-    create - авторизованному пользователю без команды;
-    update - участнику или лидеру команды;
-    delete - лидеру команды или администратору.
-    """
+class TeamViewSet(mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  GenericViewSet):
     queryset = Team.objects.prefetch_related(
         'users'
     ).annotate(
         members_count=Count('users')
     )
 
+    def get_queryset(self):
+        if self.action == 'retrieve':
+            queryset = teams.team_queryset(include_users=True)
+        else:
+            queryset = teams.team_queryset()
+
+        return queryset
+
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'list':
+        if self.action == 'create':
             serializer_class = TeamShortSerializer
         else:
             serializer_class = TeamSerializer
+
         return serializer_class
 
     def get_permissions(self):
@@ -49,70 +56,79 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # TODO: Handle requests exception
-        response = requests.post(
-            url=f'{settings.MATCHMAKING_URL}/players',
-            headers={'API-Key': settings.MATCHMAKING_API_KEY}
-        )
-        data = response.json()
-        data['name'] = request.data['name']
+        team = matchmaking.create_user()
+        team['name'] = request.data['name']
 
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=team)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_create(serializer, data['id'])
+        self.perform_create(serializer, team['id'])
 
         headers = self.get_success_headers(serializer.data)
-        data = {'password': data['password'], **serializer.data}
+        data = {
+            'password': team['password'],
+            **serializer.data
+        }
+
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def retrieve(self, request, *args, **kwargs):
+        team = self.get_object()
+
+        attach_connect_url = (request.user.team == team)
+
+        # TODO: Handle requests exception
+        team_data = matchmaking.retrieve_user(team.id)
+
+        serializer = self.get_serializer(team)
+        serializer.is_valid(raise_exception=True)
+
+        team_data.update(serializer.data)
+
+        if attach_connect_url:
+            password = matchmaking.reveal_password(team.id)
+
+            for league_player in team_data["league_players"]:
+                league_id = league_player["league"]["id"]
+                connect_url = matchmaking.construct_connect_url(
+                    league_id, team.id, password
+                )
+                league_player["connect_url"] = connect_url
+
+        return Response(team_data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer, team_id):
         serializer.save(leader=self.request.user, id=team_id)
 
     def perform_destroy(self, instance):
         # TODO: Handle requests exception
-        requests.delete(
-            url=f'{settings.MATCHMAKING_URL}/players/{instance.id}',
-            headers={'API-Key': settings.MATCHMAKING_API_KEY}
-        )
+        matchmaking.delete_user(instance.id)
         super().perform_destroy(instance)
 
-    @action(detail=True, methods=['put'])
-    def reset_password(self, request, *args, **kwargs):
+    @action(detail=True, methods=['put'], permission_classes=[IsLeader])
+    def reset_password(self, request, pk):
         # TODO: Handle requests exception
-        response = requests.put(
-            url=f'{settings.MATCHMAKING_URL}/players/reset_password',
-            headers={'API-Key': settings.MATCHMAKING_API_KEY}
-        )
-        data = response.json()
-        return Response(data, status=status.HTTP_200_OK)
+        credentials = matchmaking.user_reset_password(pk)
+        return Response(credentials, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['put'])
+    @action(methods=['put'], permission_classes=[permissions.IsAuthenticated])
     def quit(self, request):
         user = request.user
 
         if user.team:
             if user.team.leader == user:
-                user.team.delete()
+                self.perform_destroy(user.team)
             else:
                 user.team = None
                 user.save()
 
             return Response(status=status.HTTP_200_OK)
 
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def list(self, request, *args, **kwargs):
-        # TODO: Handle requests exception
-        response = requests.get(
-            url=f'{settings.MATCHMAKING_URL}/players/',
-            headers={'API-Key': settings.MATCHMAKING_API_KEY}
-        )
-        data = response.json()
-
-        for team in data:
-            team.update(retrieve_team(team['id']))
-
-        return Response(data, status=status.HTTP_200_OK)
+    @action(methods=['GET'])
+    def settings(self):
+        return Response({"max_team_size": settings.TEAM_SIZE})
 
 
 class InvitationViewSet(viewsets.ModelViewSet):
@@ -163,6 +179,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
     def accept(self, request, *args, **kwargs):
         invitation = self.get_object()
         serializer = self.get_serializer(invitation)
+        serializer.is_valid(raise_exception=True)
 
         user = invitation.user
         user.team = invitation.team

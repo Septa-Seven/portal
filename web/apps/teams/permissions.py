@@ -26,5 +26,5 @@ class IsInviter(permissions.BasePermission):
 
 
 class HasNoTeam(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         return not request.user.team

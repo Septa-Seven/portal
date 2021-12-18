@@ -1,71 +1,87 @@
-from rest_framework import status
+from rest_framework import status, permissions
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import requests
 
 from django.conf import settings
+from utils import matchmaking, teams
 from apps.teams.models import Team
+from apps.teams.serializers import TeamShortSerializer
 
 
-def retrieve_team(team_id):
-    try:
-        team = Team.objects.values('id', 'name').get(pk=team_id)
-    except Team.DoesNotExist:
-        team = {'id': team_id, 'name': 'deleted'}
-
-    return team
-
-
-def handle_game(game):
-    players = []
+def extend_game(game):
     for player in game['players']:
-        team = retrieve_team(player['id'])
-        players.append(team)
-
-    game['players'] = players
-    return game
+        teams.extend_team(player, include_users=False)
 
 
 class GamesRetrieveView(APIView):
 
     def get(self, request, pk, format=None):
+        # Handle exceptions
         try:
-            response = requests.get(
-                url=f'{settings.MATCHMAKING_URL}/games/{pk}',
-            )
+            game = matchmaking.retrieve_game(pk)
         except ConnectionError:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        if response.status_code == 200:
-            game = response.json()
-            game = handle_game(game)
-            return Response(game)
-
-        return Response(status=response.status_code)
+        extend_game(game)
+        return Response(game)
 
 
 class GamesListView(APIView):
 
     def get(self, request, format=None):
-        params = {}
-
-        if 'player_id' in request.query_params:
-            params['player_id'] = request.query_params['player_id']
-
-        if 'page' in request.query_params and 'size' in request.query_params:
-            params['page'] = request.query_params['page']
-            params['size'] = request.query_params['size']
+        qp = request.query_params
 
         try:
-            response = requests.get(
-                url=f'{settings.MATCHMAKING_URL}/games',
-                params=params
+            games = matchmaking.list_games(
+                qp.get('team_id', None),
+                qp.get('league_id', None),
+                qp.get('page', 0),
+                qp.get('size', None),
             )
         except ConnectionError:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        games = response.json()
-        games = [handle_game(game) for game in games]
+        for game in games:
+            extend_game(game)
 
         return Response(games)
+
+
+@api_view(['GET'])
+def retrieve_league(request, pk, format=None):
+    user = request.user
+    league = matchmaking.retrieve_league(pk)
+
+    attach_connect_url = (user.team is not None)
+    if attach_connect_url:
+        password = matchmaking.reveal_password(user.id)
+        connect_url = matchmaking.construct_connect_url(
+            pk, user.id, password
+        )
+        league['connect_url'] = connect_url
+
+    return Response(league)
+
+
+@api_view(['GET'])
+def league_top(request, pk, format=None):
+    league_top = matchmaking.league_top(pk)
+
+    for league_player in league_top:
+        teams.extend_team(league_player, include_users=False)
+
+    return Response(league_top)
+
+
+@api_view(['GET'])
+def list_league(request, format=None):
+    qp = request.query_params
+
+    leagues = matchmaking.list_leagues(
+        qp.get('page', 0),
+        qp.get('size', None),
+    )
+    return Response(leagues)
