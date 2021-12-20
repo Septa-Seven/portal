@@ -1,13 +1,23 @@
 from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
 from allauth.socialaccount.providers.vk.views import VKOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
 from dj_rest_auth.registration.views import SocialLoginView
 from django.conf import settings
+from rest_framework.exceptions import AuthenticationFailed
 
 
-class GithubLogin(SocialLoginView):
-    # TODO: Handle issue: https://github.com/iMerica/dj-rest-auth/issues/275
+class CatchOAuth2ErrorSocialLoginView(SocialLoginView):
+    def post(self, request, *args, **kwargs):
+        # TODO: Issue: https://github.com/iMerica/dj-rest-auth/issues/275
+        try:
+            return super().post(request, *args, **kwargs)
+        except OAuth2Error:
+            raise AuthenticationFailed
+
+
+class GithubLogin(CatchOAuth2ErrorSocialLoginView):
+
     adapter_class = GitHubOAuth2Adapter
     client_class = OAuth2Client
 
@@ -16,7 +26,7 @@ class GithubLogin(SocialLoginView):
         return settings.GITHUB_CALLBACK_URL
 
 
-class VKLogin(SocialLoginView):
+class VKLogin(CatchOAuth2ErrorSocialLoginView):
     adapter_class = VKOAuth2Adapter
     client_class = OAuth2Client
 
@@ -25,7 +35,7 @@ class VKLogin(SocialLoginView):
         return settings.VK_CALLBACK_URL
 
 
-class GoogleLogin(SocialLoginView):
+class GoogleLogin(CatchOAuth2ErrorSocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
 
