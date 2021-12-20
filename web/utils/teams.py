@@ -6,12 +6,7 @@ def team_queryset(include_users=False):
     queryset = Team.objects
     if include_users:
         queryset = queryset.prefetch_related(
-            'team__users'
-        ).only(
-            'team__id',
-            'team__name',
-            'team__users__id',
-            'team__users__username',
+            'users'
         )
 
     queryset = queryset.all()
@@ -28,6 +23,4 @@ def extend_team(team, include_users=False):
         serializer_class = TeamShortSerializer
 
     serializer = serializer_class(instance=team_object)
-    serializer.is_valid()
-
     team.update(serializer.data)

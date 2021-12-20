@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -5,9 +6,8 @@ class Team(models.Model):
     id = models.IntegerField(db_index=True, primary_key=True, editable=False)
     name = models.CharField(null=False, unique=True, max_length=200)
     description = models.TextField(blank=True)
-    rating = models.FloatField(null=False, default=0)
     leader = models.OneToOneField(
-        to='User',
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='leading_team'
     )
@@ -28,7 +28,7 @@ class Invitation(models.Model):
         related_name='invitations',
     )
     user = models.ForeignKey(
-        to=User,
+        to='users.User',
         on_delete=models.CASCADE,
         related_name='invitations',
     )

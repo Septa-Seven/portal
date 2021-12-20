@@ -9,6 +9,7 @@ from django.conf import settings
 from utils import matchmaking, teams
 from apps.teams.models import Team
 from apps.teams.serializers import TeamShortSerializer
+from utils.matchmaking import MatchmakingError
 
 
 def extend_game(game):
@@ -50,38 +51,42 @@ class GamesListView(APIView):
         return Response(games)
 
 
-@api_view(['GET'])
-def retrieve_league(request, pk, format=None):
-    user = request.user
-    league = matchmaking.retrieve_league(pk)
+class LeagueRetrieveView(APIView):
 
-    attach_connect_url = (user.team is not None)
-    if attach_connect_url:
-        password = matchmaking.reveal_password(user.id)
-        connect_url = matchmaking.construct_connect_url(
-            pk, user.id, password
+    def get(self, request, pk, format=None):
+        user = request.user
+        league = matchmaking.retrieve_league(pk)
+
+        attach_connect_url = (hasattr(user, 'team') and user.team is not None)
+        if attach_connect_url:
+            password = matchmaking.reveal_password(user.team.id)
+
+            connect_url = matchmaking.construct_connect_url(
+                pk, user.team.id, password
+            )
+            league['connect_url'] = connect_url
+
+        return Response(league)
+
+
+class LeagueTopView(APIView):
+
+    def get(self, request, pk, format=None):
+        league_top = matchmaking.league_top(pk)
+
+        for league_player in league_top:
+            teams.extend_team(league_player, include_users=False)
+
+        return Response(league_top)
+
+
+class LeagueListView(APIView):
+
+    def get(self, request, format=None):
+        qp = request.query_params
+
+        leagues = matchmaking.list_leagues(
+            qp.get('page', 0),
+            qp.get('size', None),
         )
-        league['connect_url'] = connect_url
-
-    return Response(league)
-
-
-@api_view(['GET'])
-def league_top(request, pk, format=None):
-    league_top = matchmaking.league_top(pk)
-
-    for league_player in league_top:
-        teams.extend_team(league_player, include_users=False)
-
-    return Response(league_top)
-
-
-@api_view(['GET'])
-def list_league(request, format=None):
-    qp = request.query_params
-
-    leagues = matchmaking.list_leagues(
-        qp.get('page', 0),
-        qp.get('size', None),
-    )
-    return Response(leagues)
+        return Response(leagues)

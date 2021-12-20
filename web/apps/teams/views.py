@@ -7,9 +7,12 @@ from rest_framework.viewsets import GenericViewSet
 
 from utils import matchmaking, teams
 from apps.teams.models import *
-from apps.teams.permissions import IsLeader, HasNoTeam, IsInvited, IsInviter
-from apps.teams.serializers import TeamSerializer, InvitationSerializer, \
-    TeamShortSerializer
+from apps.teams.permissions import IsLeader, HasTeam, IsInvited, IsInviter
+from apps.teams.serializers import (
+    TeamSerializer,
+    InvitationSerializer,
+    TeamShortSerializer,
+)
 from django.conf import settings
 
 
@@ -42,7 +45,7 @@ class TeamViewSet(mixins.CreateModelMixin,
 
     def get_permissions(self):
         if self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated, HasNoTeam]
+            permission_classes = [permissions.IsAuthenticated, ~HasTeam]
         elif self.action == 'retrieve':
             permission_classes = [permissions.IsAuthenticated]
         elif self.action == 'list':
@@ -81,8 +84,6 @@ class TeamViewSet(mixins.CreateModelMixin,
         team_data = matchmaking.retrieve_user(team.id)
 
         serializer = self.get_serializer(team)
-        serializer.is_valid(raise_exception=True)
-
         team_data.update(serializer.data)
 
         if attach_connect_url:
@@ -111,7 +112,11 @@ class TeamViewSet(mixins.CreateModelMixin,
         credentials = matchmaking.user_reset_password(pk)
         return Response(credentials, status=status.HTTP_200_OK)
 
-    @action(methods=['put'], permission_classes=[permissions.IsAuthenticated])
+    @action(
+        detail=False,
+        methods=['put'],
+        permission_classes=[permissions.IsAuthenticated],
+    )
     def quit(self, request):
         user = request.user
 
@@ -126,9 +131,14 @@ class TeamViewSet(mixins.CreateModelMixin,
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['GET'])
-    def settings(self):
+    @action(detail=False, methods=['GET'], url_path='settings')
+    def team_settings(self, request):
         return Response({"max_team_size": settings.TEAM_SIZE})
+
+    @action(detail=False, methods=['GET'], permission_classes=[HasTeam])
+    def my(self, request):
+        self.kwargs['pk'] = self.request.user.team.pk
+        return self.retrieve(request)
 
 
 class InvitationViewSet(viewsets.ModelViewSet):
@@ -159,7 +169,7 @@ class InvitationViewSet(viewsets.ModelViewSet):
         elif self.action == 'delete':
             permission_classes = [permissions.IsAdminUser | IsInviter | IsInvited]
         elif self.action == 'accept':
-            permission_classes = [IsInvited & HasNoTeam]
+            permission_classes = [IsInvited & (~HasTeam)]
         else:
             permission_classes = [permissions.IsAuthenticated]
 

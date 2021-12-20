@@ -25,6 +25,6 @@ class IsInviter(permissions.BasePermission):
         return invitation.team.leader == request.user
 
 
-class HasNoTeam(permissions.BasePermission):
+class HasTeam(permissions.BasePermission):
     def has_permission(self, request, view):
-        return not request.user.team
+        return request.user.team

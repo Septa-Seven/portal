@@ -26,11 +26,22 @@ api_urlpatterns = [
     path('blog/', include('apps.blog.urls')),
     path('matchmaking/', include('apps.matchmaking.urls')),
     path('auth/', include('apps.auth.urls')),
+    path('users/', include('apps.users.urls')),
 ]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(api_urlpatterns)),
     path('editorjs/', include('django_editorjs_fields.urls')),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path(
+        'swagger/',
+        schema_view.with_ui(
+            'swagger',
+            cache_timeout=0
+        ),
+        name='schema-swagger-ui'
+    ),
+    path('accounts/', include('allauth.urls')),
+] + static(
+    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+)

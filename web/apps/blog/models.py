@@ -1,8 +1,7 @@
+from django.conf import settings
 from django.db import models
 from django_editorjs_fields import EditorJsJSONField
 from taggit.managers import TaggableManager
-
-from apps.teams.models import User
 
 
 class Article(models.Model):
@@ -44,7 +43,7 @@ class Comment(models.Model):
     active = models.BooleanField(default=True)  # to hide some unacceptable comments
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='user_comments'
     )

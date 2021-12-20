@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from apps.teams.models import Team, Invitation
-from apps.users.serializer import UserSerializier
-from django.conf import settings
+from apps.users.serializers import UserSerializer
 
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -17,7 +16,6 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'rating',
             'leader',
             'members_count',
             'description',
