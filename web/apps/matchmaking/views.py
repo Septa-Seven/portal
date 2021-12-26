@@ -20,7 +20,6 @@ def extend_game(game):
 class GamesRetrieveView(APIView):
 
     def get(self, request, pk, format=None):
-        # Handle exceptions
         try:
             game = matchmaking.retrieve_game(pk)
         except ConnectionError:
@@ -59,10 +58,9 @@ class LeagueRetrieveView(APIView):
 
         attach_connect_url = (hasattr(user, 'team') and user.team is not None)
         if attach_connect_url:
-            password = matchmaking.reveal_password(user.team.id)
-
-            connect_url = matchmaking.construct_connect_url(
-                pk, user.team.id, password
+            connect_url = matchmaking.user_connect_url(
+                pk,
+                user.team.id,
             )
             league['connect_url'] = connect_url
 

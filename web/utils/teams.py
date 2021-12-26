@@ -15,12 +15,19 @@ def team_queryset(include_users=False):
 
 def extend_team(team, include_users=False):
     queryset = team_queryset(include_users)
-    team_object = queryset.get(team['id'])
-
-    if include_users:
-        serializer_class = TeamSerializer
+    try:
+        team_object = queryset.get(pk=team['id'])
+    except Team.DoesNotExist:
+        extend_info = {
+            'name': 'Not found'
+        }
     else:
-        serializer_class = TeamShortSerializer
+        if include_users:
+            serializer_class = TeamSerializer
+        else:
+            serializer_class = TeamShortSerializer
 
-    serializer = serializer_class(instance=team_object)
-    team.update(serializer.data)
+        serializer = serializer_class(instance=team_object)
+        extend_info = serializer.data
+
+    team.update(extend_info)

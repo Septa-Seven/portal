@@ -22,8 +22,16 @@ def reveal_password(user_id: int):
     return password
 
 
-def construct_connect_url(league_id: int, user_id: int, password: str):
-    return f"{settings.MATCHMAKING_WS}/connect/{league_id}/{user_id}/{password}/"
+def user_connect_url(league_id: int, user_id: int):
+    response = requests.get(
+        url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/connect_url/{league_id}'
+    )
+    data = response.json()
+    if response.status_code == 404:
+        raise ValidationError(detail=data)
+
+    url = data['connect_url']
+    return url
 
 
 def retrieve_user(user_id: int):
