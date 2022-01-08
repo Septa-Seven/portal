@@ -13,5 +13,5 @@ djangorestframework
 djangorestframework-simplejwt
 drf-yasg
 gunicorn
-psycopg2
+psycopg2-binary
 requests

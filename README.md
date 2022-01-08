@@ -2,23 +2,23 @@
 
 Build backend with local development config:
 ```commandline
-docker-compose -f docker-compose.dev.yml build
+docker-compose build
 ```
 
 Collect static files and run migrations:
 ```commandline
-docker-compose -f docker-compose.dev.yml run web python manage.py migrate
-docker-compose -f docker-compose.dev.yml run web python manage.py collectstatic
+docker-compose run web python manage.py migrate
+docker-compose run web python manage.py collectstatic
 ```
 
 Run in detach mode:
 ```commandline
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 ```
 
 Create superuser without input (see [environment variables](#superuser))
 ```commandline
-docker-compose -f docker-compose.dev.yml run web python manage.py createsuperuser --no-input
+docker-compose run web python manage.py createsuperuser --no-input
 ```
 
 
@@ -26,7 +26,7 @@ docker-compose -f docker-compose.dev.yml run web python manage.py createsuperuse
 
 Store environment variables in **_.env_** file or in shell.
 
-## [Django settings](https://docs.djangoproject.com/en/3.1/ref/settings/)
+## [Django settings](https://docs.djangoproject.com/en/4.0/ref/settings/)
 
 ### Core
 
@@ -62,19 +62,6 @@ DB_USER=<Database user>
 DB_PASSWORD=<Database password>
 DB_HOST=<Database host>
 DB_PORT=<Database port>
-```
-
-## Djoser
-
-Djoser uses [django-templated-mail](https://django-templated-mail.readthedocs.io/en/latest/settings.html) as mailing backend.
-
-```dotenv
-DOMAIN=<Frontend domain>
-```
-Djoser uses [Django Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/) as JWT token library.
-
-```dotenv
-ACCESS_TOKEN_LIFETIME=15
 ```
 
 ## AWS S3 serving

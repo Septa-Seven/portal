@@ -21,11 +21,11 @@ class CommentSerializer(serializers.ModelSerializer):
         )
 
 
-class StringListField(serializers.ListField):  # get from http://www.django-rest-framework.org/api-guide/fields/#listfield
+class StringListField(serializers.ListField):
     child = serializers.CharField()
 
     def to_representation(self, data):
-        return data.values_list('name', flat=True)  # you change the representation style here.
+        return data.values_list('name', flat=True)
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -71,12 +71,12 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
-        instance = super(ArticleDetailSerializer, self).create(validated_data)
+        instance = super().create(validated_data)
         instance.tags.set(*tags)
         return instance
 
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        instance = super(ArticleDetailSerializer, self).create(validated_data)
+        instance = super().create(validated_data)
         instance.tags.set(*tags)
         return instance
