@@ -1,6 +1,7 @@
 from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
 from allauth.socialaccount.providers.vk.views import VKOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.yandex.views import YandexAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
 from dj_rest_auth.registration.views import SocialLoginView
 from django.conf import settings
@@ -42,3 +43,12 @@ class GoogleLogin(CatchOAuth2ErrorSocialLoginView):
     @property
     def callback_url(self):
         return settings.GOOGLE_CALLBACK_URL
+
+
+class YandexLogin(CatchOAuth2ErrorSocialLoginView):
+    adapter_class = YandexAuth2Adapter
+    client_class = OAuth2Client
+
+    @property
+    def callback_url(self):
+        return settings.YANDEX_CALLBACK_URL

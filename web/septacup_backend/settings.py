@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.vk',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.yandex',
     'django_editorjs_fields',
     'corsheaders',
     'taggit',
@@ -194,12 +195,20 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': env('GOOGLE_AUTH_SECRET'),
             'key': '',
         }
-    }
+    },
+    'yandex': {
+        'APP': {
+            'client_id': env('YANDEX_AUTH_CLIENT_ID'),
+            'secret': env('YANDEX_AUTH_SECRET'),
+            'key': '',
+        }
+    },
 }
 
 GITHUB_CALLBACK_URL = DOMAIN + '/github_callback'
 VK_CALLBACK_URL = DOMAIN + '/vk_callback'
 GOOGLE_CALLBACK_URL = DOMAIN + '/google_callback'
+YANDEX_CALLBACK_URL = DOMAIN + '/yandex_callback'
 
 # TODO: Email activation
 
