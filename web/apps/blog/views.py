@@ -1,12 +1,9 @@
 from django.db.models import Count, Prefetch, Subquery
 from django.db.models.expressions import OuterRef
-from django.views.generic import DetailView
 
 from rest_framework import permissions, viewsets, mixins
-from rest_framework.generics import get_object_or_404
 
 from apps.blog.filters import TagsFilter
-from apps.blog.models import Article, Comment
 from apps.blog.serializers import *
 from apps.blog.permissions import IsOwner
 
