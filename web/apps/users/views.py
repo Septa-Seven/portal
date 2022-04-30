@@ -1,13 +1,16 @@
-from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin
+from rest_framework import mixins
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.viewsets import GenericViewSet
 
-from apps.teams.permissions import HasTeam
+from apps.teams.models import Invitation
+from apps.teams.permissions import IsLeader
+from apps.teams.serializers import InvitationSerializer
+from apps.teams.services import querysets
 from apps.users.models import User
-from apps.users.serializers import UserSerializer, UserListSerializer
+from apps.users.serializers import UserSerializer, UserPreviewSerializer
 
 
-class UserViewSet(ListModelMixin, GenericViewSet):
+class UserViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -20,7 +23,7 @@ class UserViewSet(ListModelMixin, GenericViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            serializer_class = UserListSerializer
+            serializer_class = UserPreviewSerializer
         else:
             serializer_class = UserSerializer
 
@@ -29,8 +32,31 @@ class UserViewSet(ListModelMixin, GenericViewSet):
     def filter_queryset(self, queryset):
         if self.action == 'list':
             username = self.request.query_params.get('username')
+            has_team = self.request.query_params.get('has_team')
 
             if username is not None:
                 queryset = queryset.filter(username__contains=username)
 
+            if has_team is not None:
+                if has_team == "1":
+                    queryset = queryset.exclude(team__isnull=True)
+                else:
+                    queryset = queryset.filter(team__isnull=True)
+
+            is_leader = IsLeader().has_permission(self.request, self)
+            if is_leader:
+                users_with_invitation = Invitation.objects.filter(
+                    team=self.request.user.team
+                ).values("user_id")
+                queryset = queryset.exclude(id__in=users_with_invitation)
+
+        return queryset
+
+
+class UserInvitationsListViewSet(mixins.ListModelMixin, GenericViewSet):
+    queryset = querysets.invitations_queryset()
+    serializer_class = InvitationSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(user=self.request.user)
         return queryset

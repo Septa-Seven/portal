@@ -1,14 +1,16 @@
-from django.db.models import Count, When, Case, BooleanField
-from rest_framework import permissions, viewsets, status, mixins
+from django.db.models import Count
+from rest_framework import permissions, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from rest_framework.viewsets import GenericViewSet
 
+from apps.teams.services import querysets
 from utils import matchmaking, teams
 from apps.teams.models import *
-from apps.teams.permissions import IsLeader, HasTeam, IsInvited, IsInviter
+from apps.teams.permissions import IsLeader, HasTeam, HasNoTeam, IsInvited, IsInviter
 from apps.teams.serializers import (
+    CreateInvitationSerializer,
     TeamSerializer,
     InvitationSerializer,
     TeamShortSerializer,
@@ -38,6 +40,8 @@ class TeamViewSet(mixins.CreateModelMixin,
     def get_serializer_class(self):
         if self.action == 'create':
             serializer_class = TeamShortSerializer
+        elif self.action == 'invitations':
+            serializer_class = InvitationSerializer
         else:
             serializer_class = TeamSerializer
 
@@ -45,13 +49,17 @@ class TeamViewSet(mixins.CreateModelMixin,
 
     def get_permissions(self):
         if self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated, ~HasTeam]
+            permission_classes = [permissions.IsAuthenticated, HasNoTeam]
         elif self.action == 'retrieve':
-            permission_classes = [permissions.IsAuthenticated]
-        elif self.action == 'list':
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = []
         elif self.action == 'update':
-            permission_classes = [IsLeader]
+            permission_classes = [permissions.IsAuthenticated, IsLeader]
+        elif self.action == 'my':
+            permission_classes = [permissions.IsAuthenticated, HasTeam]
+        elif self.action == 'quit':
+            permission_classes = [permissions.IsAuthenticated, HasTeam]
+        elif self.action == 'reset_token':
+            permission_classes = [permissions.IsAuthenticated, IsLeader]
         else:
             permission_classes = [permissions.IsAdminUser | IsLeader]
 
@@ -60,6 +68,7 @@ class TeamViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         # TODO: Handle requests exception
         team = matchmaking.create_user()
+        # TODO: name always must be provided
         team['name'] = request.data['name']
 
         serializer = self.get_serializer(data=team)
@@ -69,7 +78,6 @@ class TeamViewSet(mixins.CreateModelMixin,
 
         headers = self.get_success_headers(serializer.data)
         data = {
-            'password': team['password'],
             **serializer.data
         }
 
@@ -87,12 +95,10 @@ class TeamViewSet(mixins.CreateModelMixin,
         team_data.update(serializer.data)
 
         if attach_connect_url:
-            password = matchmaking.reveal_password(team.id)
-
             for league_player in team_data["league_players"]:
                 league_id = league_player["league"]["id"]
                 connect_url = matchmaking.construct_connect_url(
-                    league_id, team.id, password
+                    league_id, team.id
                 )
                 league_player["connect_url"] = connect_url
 
@@ -106,17 +112,13 @@ class TeamViewSet(mixins.CreateModelMixin,
         matchmaking.delete_user(instance.id)
         super().perform_destroy(instance)
 
-    @action(detail=True, methods=['put'], permission_classes=[IsLeader])
-    def reset_password(self, request, pk):
+    @action(detail=True, methods=['POST'])
+    def reset_token(self, request, pk):
         # TODO: Handle requests exception
-        credentials = matchmaking.user_reset_password(pk)
+        credentials = matchmaking.user_reset_token(pk)
         return Response(credentials, status=status.HTTP_200_OK)
 
-    @action(
-        detail=False,
-        methods=['put'],
-        permission_classes=[permissions.IsAuthenticated],
-    )
+    @action(detail=False, methods=['POST'])
     def quit(self, request):
         user = request.user
 
@@ -129,19 +131,23 @@ class TeamViewSet(mixins.CreateModelMixin,
 
             return Response(status=status.HTTP_200_OK)
 
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
     @action(detail=False, methods=['GET'], url_path='settings')
     def team_settings(self, request):
         return Response({"max_team_size": settings.TEAM_SIZE})
 
-    @action(detail=False, methods=['GET'], permission_classes=[HasTeam])
+    @action(detail=False, methods=['GET'])
     def my(self, request):
-        self.kwargs['pk'] = self.request.user.team.pk
+        team = self.request.user.team
+        self.kwargs['pk'] = team.pk if team else None
         return self.retrieve(request)
 
 
-class InvitationViewSet(viewsets.ModelViewSet):
+class InvitationViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
     """
     Вьюсет приглашения.
     полный list доступен администратору;
@@ -151,45 +157,42 @@ class InvitationViewSet(viewsets.ModelViewSet):
     accept - приглашенному без команды;
     delete - лидеру, приглашенному или администратору.
     """
-    queryset = Invitation.objects.prefetch_related('team').annotate(
-        count=Count('team__users'),
-        active=Case(
-            When(count__lt=settings.TEAM_SIZE, then=True),
-            When(count__gte=settings.TEAM_SIZE, then=False),
-            output_field=BooleanField()
-        )
-    )
-    serializer_class = InvitationSerializer
+    queryset = querysets.invitations_queryset()
 
     def get_permissions(self):
+        permission_classes = [permissions.IsAuthenticated]
+
         if self.action == 'create':
-            permission_classes = [IsLeader]
+            permission_classes += [IsLeader]
         elif self.action == 'retrieve':
-            permission_classes = [IsInviter | IsInvited]
+            permission_classes += [IsInviter | IsInvited]
         elif self.action == 'delete':
-            permission_classes = [permissions.IsAdminUser | IsInviter | IsInvited]
+            permission_classes += [permissions.IsAdminUser | IsInviter | IsInvited]
         elif self.action == 'accept':
-            permission_classes = [IsInvited & (~HasTeam)]
-        else:
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes += [HasNoTeam, IsInvited]
+        elif self.action == 'list':
+            permission_classes += [HasTeam, IsLeader]
 
         return [permission_class() for permission_class in permission_classes]
 
     def get_queryset(self):
         queryset = super().get_queryset()
         if self.action == 'list':
-            queryset = queryset.filter(user=self.request.user)
+            queryset = queryset.filter(team=self.request.user.team)
 
         return queryset
 
-    def perform_create(self, serializer):
-        serializer.save(team=self.request.user.team)
+    def get_serializer_class(self):
+        if self.action == "create":
+            serializer_class = CreateInvitationSerializer
+        else:
+            serializer_class = InvitationSerializer
 
-    @action(detail=True, methods=['post'])
+        return serializer_class
+
+    @action(detail=True, methods=['POST'])
     def accept(self, request, *args, **kwargs):
         invitation = self.get_object()
-        serializer = self.get_serializer(invitation)
-        serializer.is_valid(raise_exception=True)
 
         user = invitation.user
         user.team = invitation.team
@@ -197,4 +200,4 @@ class InvitationViewSet(viewsets.ModelViewSet):
 
         invitation.delete()
 
-        return Response(serializer.data)
+        return Response(status=status.HTTP_200_OK)

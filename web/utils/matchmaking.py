@@ -9,20 +9,7 @@ class MatchmakingError(Exception):
         super().__init__(*args)
 
 
-def reveal_password(user_id: int):
-    response = requests.get(
-        url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/reveal_password',
-        headers={'API-Key': settings.MATCHMAKING_API_KEY},
-    )
-    data = response.json()
-    if response.status_code == 404:
-        raise MatchmakingError(data)
-
-    password = data["password"]
-    return password
-
-
-def user_connect_url(league_id: int, user_id: int):
+def construct_connect_url(league_id: int, user_id: int):
     response = requests.get(
         url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/connect_url/{league_id}'
     )
@@ -64,9 +51,9 @@ def delete_user(user_id: int):
     return data
 
 
-def user_reset_password(user_id: int):
+def user_reset_token(user_id: int):
     response = requests.put(
-        url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/reset_password',
+        url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/reset_token',
         headers={'API-Key': settings.MATCHMAKING_API_KEY}
     )
     data = response.json()

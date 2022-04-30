@@ -4,6 +4,7 @@ from apps.users import views
 
 router = SimpleRouter()
 
+router.register('invitations', views.UserInvitationsListViewSet)
 router.register('', views.UserViewSet)
 
 urlpatterns = router.urls

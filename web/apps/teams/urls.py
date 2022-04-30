@@ -1,12 +1,10 @@
-from django.template.defaulttags import url
 from rest_framework.routers import SimpleRouter
 from apps.teams import views
 
 
 router = SimpleRouter()
 
-router.register('', views.TeamViewSet)
 router.register('invitations', views.InvitationViewSet)
+router.register('', views.TeamViewSet)
 
 urlpatterns = router.urls
-
