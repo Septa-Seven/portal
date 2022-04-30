@@ -221,7 +221,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(
         minutes=env('ACCESS_TOKEN_LIFETIME', default=15)
     ),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(minutes=env('REFRESH_TOKEN_LIFETIME', default=30)),
 }
 
 
