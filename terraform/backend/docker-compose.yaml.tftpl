@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+  web:
+    container_name: portal
+    image: ${image_tag}
+    ports:
+      - "80:8000"
+    ${indent(4, yamlencode({"environment": split("\n", environment)}))}
+    restart: always

@@ -11,7 +11,8 @@ class MatchmakingError(Exception):
 
 def construct_connect_url(league_id: int, user_id: int):
     response = requests.get(
-        url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/connect_url/{league_id}'
+        url=f'{settings.MATCHMAKING_HTTP}/users/{user_id}/connect_url/{league_id}',
+        headers={'API-Key': settings.MATCHMAKING_API_KEY}
     )
     data = response.json()
     if response.status_code == 404:

@@ -86,7 +86,7 @@ class TeamViewSet(mixins.CreateModelMixin,
     def retrieve(self, request, *args, **kwargs):
         team = self.get_object()
 
-        attach_connect_url = (request.user.team == team)
+        attach_connect_url = (not request.user.is_anonymous and request.user.team == team)
 
         # TODO: Handle requests exception
         team_data = matchmaking.retrieve_user(team.id)

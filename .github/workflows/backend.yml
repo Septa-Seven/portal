@@ -1,0 +1,68 @@
+name: Backend
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Docker image tag
+        type: string
+        required: true
+jobs:
+  update-infrastruture:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      -
+        name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+      -
+        name: Install Yandex Cloud CLI
+        run: |
+          curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i /opt/yandex-cloud -n
+          echo "/opt/yandex-cloud/bin" >> $GITHUB_PATH
+      -
+        name: Check out code
+        uses: actions/checkout@v2
+      -
+        name: Upgrade infrastructure
+        working-directory: terraform/backend
+        env:
+          YC_SERVICE_ACCOUNT_KEY_FILE: ${{ secrets.YC_SA_AUTHORIZED_KEY_JSON }}
+          YC_SA_STATIC_KEY_JSON: ${{ secrets.YC_SA_STATIC_KEY_JSON }}
+          YC_LOCKBOX_SECRET_ID: ${{ secrets.YC_LOCKBOX_SECRET_ID }}
+          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+          YC_ZONE: ${{ secrets.YC_ZONE }}
+          AWS_REGION: ${{ secrets.YC_ZONE }}
+        run: |
+          # AWS S3 backend provided by terraform to store state
+          export AWS_ACCESS_KEY_ID=$(echo $YC_SA_STATIC_KEY_JSON | jq -r ".access_key.key_id")
+          export AWS_SECRET_ACCESS_KEY=$(echo $YC_SA_STATIC_KEY_JSON | jq -r ".secret")
+          
+          # Yandex.Cloud S3 to load remote state and to create buckets
+          export YC_STORAGE_ACCESS_KEY="$AWS_ACCESS_KEY_ID"
+          export YC_STORAGE_SECRET_KEY="$AWS_SECRET_ACCESS_KEY"
+
+          echo "$YC_SERVICE_ACCOUNT_KEY_FILE" > authorized_key.json
+          
+          yc config profile create sa-profile
+          yc config set service-account-key authorized_key.json
+          yc config set cloud-id ${{ env.YC_CLOUD_ID }}
+          yc config set folder-id ${{ env.YC_FOLDER_ID }}
+          
+          yc lockbox payload get --id ${{ env.YC_LOCKBOX_SECRET_ID }} --format json > payload.json
+          python lockbox_json_to_env.py --payload_file payload.json --output .env
+          
+          export TF_VAR_environment="$(cat .env)"
+          export TF_VAR_service_account_id=$(jq -r ".service_account_id" authorized_key.json)
+          export TF_VAR_image_tag="${{ github.event.inputs.image_tag }}"
+          
+          terraform init
+          terraform plan -input=false
+          terraform apply -auto-approve -input=false

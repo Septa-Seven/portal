@@ -1,15 +1,8 @@
-from rest_framework import status, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import requests
-
-from django.conf import settings
 from utils import matchmaking, teams
-from apps.teams.models import Team
-from apps.teams.serializers import TeamShortSerializer
-from utils.matchmaking import MatchmakingError
 
 
 def extend_game(game):
@@ -58,7 +51,7 @@ class LeagueRetrieveView(APIView):
 
         attach_connect_url = (hasattr(user, 'team') and user.team is not None)
         if attach_connect_url:
-            connect_url = matchmaking.user_connect_url(
+            connect_url = matchmaking.construct_connect_url(
                 pk,
                 user.team.id,
             )
