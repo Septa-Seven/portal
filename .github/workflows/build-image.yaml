@@ -11,7 +11,7 @@ jobs:
     environment: production
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: cr.yandex/crph9p4r5qmnur4oacqj/matchmaking:${{ github.sha }}
+      IMAGE_TAG: cr.yandex/crp9d7sqskl7c428opg7/portal:${{ github.sha }}
     outputs:
       image_tag: ${{ env.IMAGE_TAG }}
     steps:
