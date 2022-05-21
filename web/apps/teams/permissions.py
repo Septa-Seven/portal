@@ -6,16 +6,13 @@ class IsLeader(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-
-        if user.team:
-            return user.team.leader == user
-
-        return False
+        return not user.is_anonymous and user.team and user.team.leader == user
 
 
 class IsMember(permissions.BasePermission):
     def has_object_permission(self, request, view, team):
-        return request.user.team == team
+        user = request.user
+        return not user.is_anonymous and user.team == team
 
 
 class IsInvited(permissions.BasePermission):
@@ -29,18 +26,19 @@ class IsInviter(permissions.BasePermission):
     message = "User is not inviter"
 
     def has_object_permission(self, request, view, invitation):
-        return invitation.team.leader == request.user
+        return not request.user.is_anonymous and invitation.team.leader == request.user
 
 
 class HasTeam(permissions.BasePermission):
     message = "User has no team"
 
     def has_permission(self, request, view):
-        return request.user.team is not None
+        return not request.user.is_anonymous and request.user.team is not None
 
 
 class HasNoTeam(permissions.BasePermission):
     message = "User has team"
 
     def has_permission(self, request, view):
-        return request.user.team is None
+        user = request.user
+        return user.is_anonymous and user.team is None
