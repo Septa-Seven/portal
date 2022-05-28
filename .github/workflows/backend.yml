@@ -57,7 +57,7 @@ jobs:
           yc config set folder-id ${{ env.YC_FOLDER_ID }}
           
           yc lockbox payload get --id ${{ env.YC_LOCKBOX_SECRET_ID }} --format json > payload.json
-          python lockbox_json_to_env.py --payload_file payload.json --output .env
+          python lockbox_json_to_env.py --payload-file payload.json --output .env
           
           export TF_VAR_environment="$(cat .env)"
           export TF_VAR_service_account_id=$(jq -r ".service_account_id" authorized_key.json)
