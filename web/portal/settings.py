@@ -257,6 +257,7 @@ if USE_AWS_S3:
     INSTALLED_APPS.append('django_s3_storage')
 
     # AWS authentication
+    AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
     AWS_REGION = env('AWS_REGION')
     AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
