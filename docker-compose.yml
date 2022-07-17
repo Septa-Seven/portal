@@ -10,8 +10,8 @@ services:
       - 8000
     depends_on:
       - db
-    env_file:
-      - ./web/.env.dev
+    environment:
+      - DOPPLER_TOKEN
   db:
     image: postgres:13.1-alpine
     volumes:

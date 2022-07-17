@@ -41,7 +41,8 @@ RUN mkdir $APP_HOME/media
 RUN chown app:app $APP_HOME/media
 
 # install dependencies
-RUN apk update && apk add gcc libpq python3-dev musl-dev libffi-dev
+RUN apk update && apk add gcc libpq python3-dev musl-dev libffi-dev curl gpg && \
+    (curl -Ls --tlsv1.2 --proto "=https" --retry 3 https://cli.doppler.com/install.sh || wget -t 3 -qO- https://cli.doppler.com/install.sh) | sh
 COPY --from=builder /usr/src/septacup/wheels /wheels
 COPY --from=builder /usr/src/septacup/requirements.txt .
 RUN pip install --no-cache /wheels/*
@@ -52,4 +53,5 @@ COPY --chown=app:app . $APP_HOME
 # change to the app user
 USER app
 
+ENTRYPOINT ["doppler", "run", "--"]
 CMD ["gunicorn", "portal.wsgi:application", "--bind", "0.0.0.0:8000"]
