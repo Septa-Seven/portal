@@ -41,4 +41,4 @@ class HasNoTeam(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return user.is_anonymous and user.team is None
+        return user.is_anonymous or user.team is None
