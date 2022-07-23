@@ -5,6 +5,6 @@ from apps.teams import views
 router = SimpleRouter()
 
 router.register('invitations', views.InvitationViewSet)
-router.register('', views.TeamViewSet)
+router.register('', views.TeamViewSet, basename="teams")
 
 urlpatterns = router.urls

@@ -1,3 +1,5 @@
+from django.db.models import Count
+
 from apps.teams.models import Team
 from apps.teams.serializers import TeamSerializer, TeamShortSerializer
 
@@ -7,6 +9,8 @@ def team_queryset(include_users=False):
     if include_users:
         queryset = queryset.prefetch_related(
             'users'
+        ).annotate(
+            members_count=Count('users')
         )
 
     queryset = queryset.all()

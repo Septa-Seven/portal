@@ -1,4 +1,3 @@
-from django.db.models import Count
 from rest_framework import permissions, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -23,11 +22,6 @@ class TeamViewSet(mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
                   GenericViewSet):
-    queryset = Team.objects.prefetch_related(
-        'users'
-    ).annotate(
-        members_count=Count('users')
-    )
 
     def get_queryset(self):
         if self.action == 'retrieve':
