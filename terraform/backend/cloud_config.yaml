@@ -6,4 +6,4 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     shell: /bin/bash
     ssh_authorized_keys:
-      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClKmV6DBkwBmxDavkNNApE682MENJTcmpk1KYaVUvnx6u2CQWfK0Ha/KEDq7ROIy3x+vFfM9uikswb+2OqS7KId62xjVNXmKbdc/iWJPZrA9gl6R3bwUMtN124OAlFW853JeCh3sxaWAusZB1SJVeTpsprxYpP72uheTX//xJjFQuWtg6xZkOiOFlNAnlCShDAHLY8zmN8hZHO43e51tfYuNEvi4HOyYkPKZNFMFstEwi0cL3XeB91a9UfvpJtW1HTqryTq7mN7r+DoOyFBG39jvpxvPaZpqsdvPrjnRSH0ID/HLUpRasPVFfuiHnOtCf2SsuK6Fi+/0CvM3+FKDCh pymole@yandex-team.ru"
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKGApXn+0UKtQZBMqa3jysbdUez9GPwpo7QA57IfGk4r shevela@tochka.com"
