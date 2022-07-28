@@ -1,14 +1,4 @@
-variable "db_password" {
-  type = string
-  sensitive = true
-}
-
-variable "db_name" {
-  type = string
-  sensitive = true
-}
-
-variable "db_user" {
+variable "doppler_token_portal_prod" {
   type = string
   sensitive = true
 }

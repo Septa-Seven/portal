@@ -13,11 +13,6 @@ jobs:
         with:
           terraform_wrapper: false
       -
-        name: Install Yandex Cloud CLI
-        run: |
-          curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i /opt/yandex-cloud -n
-          echo "/opt/yandex-cloud/bin" >> $GITHUB_PATH
-      -
         name: Check out code
         uses: actions/checkout@v2
       -
@@ -26,7 +21,6 @@ jobs:
         env:
           YC_SERVICE_ACCOUNT_KEY_FILE: ${{ secrets.YC_SA_AUTHORIZED_KEY_JSON }}
           YC_SA_STATIC_KEY_JSON: ${{ secrets.YC_SA_STATIC_KEY_JSON }}
-          YC_LOCKBOX_SECRET_ID: ${{ secrets.YC_LOCKBOX_SECRET_ID }}
           YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
           YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
           YC_ZONE: ${{ secrets.YC_ZONE }}
@@ -40,22 +34,6 @@ jobs:
           export YC_STORAGE_ACCESS_KEY="$AWS_ACCESS_KEY_ID"
           export YC_STORAGE_SECRET_KEY="$AWS_SECRET_ACCESS_KEY"
           
-          echo "$YC_SERVICE_ACCOUNT_KEY_FILE" > authorized_key.json
-          yc config profile create sa-profile
-          yc config set service-account-key authorized_key.json
-          yc config set cloud-id ${{ env.YC_CLOUD_ID }}
-          yc config set folder-id ${{ env.YC_FOLDER_ID }}
-          
-          export TF_VAR_db_name=$(yc lockbox payload get --id ${{ env.YC_LOCKBOX_SECRET_ID}} --key DB_NAME)
-          export TF_VAR_db_password=$(yc lockbox payload get --id ${{ env.YC_LOCKBOX_SECRET_ID}} --key DB_PASSWORD)
-          export TF_VAR_db_user=$(yc lockbox payload get --id ${{ env.YC_LOCKBOX_SECRET_ID}} --key DB_USER)
-          
           terraform init
           terraform plan -input=false
           terraform apply -auto-approve -input=false
-          
-          DB_HOST=$(terraform output -raw db_host)
-          if [[ $(yc lockbox payload get --id ${{ env.YC_LOCKBOX_SECRET_ID }} --key DB_HOST 2> /dev/null) != $DB_HOST ]]
-          then
-            yc lockbox secret add-version --id ${{ env.YC_LOCKBOX_SECRET_ID }} --payload "[{\"key\": \"DB_HOST\", \"text_value\": \"$DB_HOST\"}]"
-          fi

@@ -2,7 +2,7 @@ terraform {
   required_providers {
     yandex = {
       source  = "yandex-cloud/yandex"
-      version = "0.76.0"
+      version = ">= 0.76.0"
     }
   }
 
@@ -53,7 +53,7 @@ resource "yandex_compute_instance" "instance-based-on-coi" {
   metadata = {
     docker-compose = templatefile("${path.module}/docker-compose.yaml.tftpl", {
       image_tag = var.image_tag,
-      environment = var.environment
+      doppler_token = var.doppler_token_portal_prod
     })
     user-data = file("${path.module}/cloud_config.yaml")
   }

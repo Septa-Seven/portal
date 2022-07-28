@@ -6,8 +6,7 @@ variable "service_account_id" {
   type = string
 }
 
-variable "environment" {
+variable "doppler_token_portal_prod" {
   type = string
-  default = ""
   sensitive = true
 }

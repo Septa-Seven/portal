@@ -2,7 +2,7 @@
 ssh_pwauth: no
 users:
   - name: septa
-    groups: sudo
+    groups: [sudo, docker]
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     shell: /bin/bash
     ssh_authorized_keys:

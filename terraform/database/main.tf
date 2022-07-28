@@ -2,7 +2,11 @@ terraform {
   required_providers {
     yandex = {
       source  = "yandex-cloud/yandex"
-      version = "0.76.0"
+      version = ">= 0.72.0"
+    }
+    doppler = {
+      source = "DopplerHQ/doppler"
+      version = ">= 1.0.0"
     }
   }
 
@@ -16,13 +20,22 @@ terraform {
   }
 }
 
+provider "doppler" {
+  doppler_token = var.doppler_token_portal_prod
+}
+
+locals {
+  db_name = "portal"
+  db_user = "septa"
+}
+
 data "yandex_client_config" "config" {}
 
 data "terraform_remote_state" "network" {
   backend = "s3"
   config = {
     endpoint = "storage.yandexcloud.net"
-    bucket = "septa-portal"
+    bucket = "portal"
     key = "terraform/network.tfstate"
 
     skip_region_validation = true
@@ -30,8 +43,13 @@ data "terraform_remote_state" "network" {
   }
 }
 
+resource "random_password" "db_password" {
+  length = 32
+  special = false
+}
+
 resource "yandex_mdb_postgresql_cluster" "db" {
-  name = var.db_name
+  name = local.db_name
   environment = "PRESTABLE"
   network_id = data.terraform_remote_state.network.outputs.network_id
 
@@ -43,7 +61,7 @@ resource "yandex_mdb_postgresql_cluster" "db" {
       disk_size = 16
     }
     postgresql_config = {
-      max_connections = 395
+      max_connections = 100
       enable_parallel_hash = true
       vacuum_cleanup_index_scale_factor = 0.2
       autovacuum_vacuum_scale_factor = 0.34
@@ -59,16 +77,16 @@ resource "yandex_mdb_postgresql_cluster" "db" {
   }
 
   database {
-    name = var.db_name
-    owner = var.db_user
+    name = local.db_name
+    owner = local.db_user
   }
 
   user {
-    name = var.db_user
-    password = var.db_password
+    name = local.db_user
+    password = random_password.db_password.result
     conn_limit = 50
     permission {
-      database_name = var.db_name
+      database_name = local.db_name
     }
     settings = {
       default_transaction_isolation = "read committed"
@@ -82,6 +100,18 @@ resource "yandex_mdb_postgresql_cluster" "db" {
   }
 }
 
-output "db_host" {
+# Save the random password to Doppler
+resource "doppler_secret" "db_password" {
+  project = "portal"
+  config = "prd"
+  name = "DB_PASSWORD"
+  value = random_password.db_password.result
+}
+
+# Save FQDN of the database
+resource "doppler_secret" "db_host" {
+  project = "portal"
+  config = "prd"
+  name = "DB_HOST"
   value = yandex_mdb_postgresql_cluster.db.host.0.fqdn
 }
