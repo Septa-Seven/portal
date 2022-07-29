@@ -2,7 +2,7 @@ terraform {
   required_providers {
     yandex = {
       source  = "yandex-cloud/yandex"
-      version = ">= 0.76.0"
+      version = ">= 0.77.0"
     }
   }
 
@@ -43,6 +43,7 @@ resource "yandex_compute_instance" "instance-based-on-coi" {
   network_interface {
     subnet_id = data.terraform_remote_state.network.outputs.subnet_id
     nat = true
+    nat_ip_address = data.terraform_remote_state.network.portal_address
   }
   resources {
     cores = 2

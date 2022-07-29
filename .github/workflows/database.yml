@@ -34,6 +34,6 @@ jobs:
           export YC_STORAGE_ACCESS_KEY="$AWS_ACCESS_KEY_ID"
           export YC_STORAGE_SECRET_KEY="$AWS_SECRET_ACCESS_KEY"
           
-          terraform init
+          terraform init -upgrade
           terraform plan -input=false
           terraform apply -auto-approve -input=false

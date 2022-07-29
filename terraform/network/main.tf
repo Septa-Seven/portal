@@ -2,7 +2,7 @@ terraform {
   required_providers {
     yandex = {
       source  = "yandex-cloud/yandex"
-      version = ">= 0.72.0"
+      version = ">= 0.77.0"
     }
   }
 
@@ -30,7 +30,7 @@ resource "yandex_vpc_subnet" "subnet" {
   v4_cidr_blocks = ["10.5.0.0/24"]
 }
 
-resource "yandex_vpc_address" "web_address" {
+resource "yandex_vpc_address" "portal_address" {
   name = "web_address"
 
   external_ipv4_address {
@@ -44,4 +44,8 @@ output "network_id" {
 
 output "subnet_id" {
   value = yandex_vpc_subnet.subnet.id
+}
+
+output "portal_address" {
+  value = yandex_vpc_address.portal_address.external_ipv4_address[0].address
 }

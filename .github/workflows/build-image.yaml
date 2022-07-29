@@ -8,12 +8,9 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    environment: production
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: cr.yandex/crp9d7sqskl7c428opg7/portal:${{ github.sha }}
-    outputs:
-      image_tag: ${{ env.IMAGE_TAG }}
+      REPO: cr.yandex/crp9d7sqskl7c428opg7/portal
     steps:
       -
         name: Check out code
@@ -34,4 +31,4 @@ jobs:
         with:
           context: ./web
           push: true
-          tags: ${{ env.IMAGE_TAG }}
+          tags: ${{ env.REPO }}:${{ github.sha }}, ${{ env.REPO }}:latest
