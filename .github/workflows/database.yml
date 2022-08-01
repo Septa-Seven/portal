@@ -25,6 +25,7 @@ jobs:
           YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
           YC_ZONE: ${{ secrets.YC_ZONE }}
           AWS_REGION: ${{ secrets.YC_ZONE }}
+          TF_VAR_doppler_token_portal_prod: ${{ secrets.DOPPLER_TOKEN_PORTAL_PROD }}
         run: |
           # AWS S3 backend provided by terraform to store state
           export AWS_ACCESS_KEY_ID=$(echo $YC_SA_STATIC_KEY_JSON | jq -r ".access_key.key_id")
