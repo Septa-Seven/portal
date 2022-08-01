@@ -257,7 +257,6 @@ if USE_AWS_S3:
     INSTALLED_APPS.append('django_s3_storage')
 
     # AWS authentication
-    AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
     AWS_REGION = env('AWS_REGION')
     AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
@@ -266,6 +265,7 @@ if USE_AWS_S3:
     DEFAULT_FILE_STORAGE = 'django_s3_storage.storage.S3Storage'
 
     # No auth by default
+    AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
     AWS_S3_BUCKET_AUTH = False
     AWS_S3_BUCKET_NAME = env('AWS_S3_BUCKET_NAME')
     AWS_S3_ADDRESSING_STYLE = 'auto'
@@ -274,6 +274,7 @@ if USE_AWS_S3:
     # Static files settings
     STATICFILES_STORAGE = 'django_s3_storage.storage.StaticS3Storage'
 
+    AWS_S3_ENDPOINT_URL_STATIC = env('AWS_S3_ENDPOINT_URL')
     AWS_S3_BUCKET_NAME_STATIC = env('AWS_S3_BUCKET_NAME')
     AWS_S3_ADDRESSING_STYLE_STATIC = 'auto'
     AWS_S3_KEY_PREFIX_STATIC = 'static'
