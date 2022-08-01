@@ -35,7 +35,7 @@ data "terraform_remote_state" "network" {
   backend = "s3"
   config = {
     endpoint = "storage.yandexcloud.net"
-    bucket = "portal"
+    bucket = "septa-portal"
     key = "terraform/network.tfstate"
 
     skip_region_validation = true
