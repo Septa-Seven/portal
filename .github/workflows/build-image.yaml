@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 jobs:
   build:
+    environment: production
     runs-on: ubuntu-latest
     env:
       REPO: cr.yandex/crp9d7sqskl7c428opg7/portal
