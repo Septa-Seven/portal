@@ -31,7 +31,7 @@ resource "yandex_vpc_subnet" "subnet" {
 }
 
 resource "yandex_vpc_address" "portal_address" {
-  name = "web_address"
+  name = "portal_address"
 
   external_ipv4_address {
     zone_id = data.yandex_client_config.config.zone
