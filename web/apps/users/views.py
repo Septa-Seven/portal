@@ -1,4 +1,4 @@
-from rest_framework import mixins
+from rest_framework import mixins, permissions
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.viewsets import GenericViewSet
 
@@ -15,9 +15,9 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = super().get_queryset()
         if self.action == 'list':
-            queryset = self.queryset.only('id', 'username')
+            queryset = queryset.only('id', 'username')
 
         return queryset
 
@@ -56,6 +56,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 class UserInvitationsListViewSet(mixins.ListModelMixin, GenericViewSet):
     queryset = querysets.invitations_queryset()
     serializer_class = InvitationSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
