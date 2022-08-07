@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 import requests
 from rest_framework.exceptions import ValidationError
@@ -124,3 +126,42 @@ def list_leagues(page: int = 0, size: int = None):
     )
     leagues = response.json()
     return leagues
+
+
+def create_league(start: datetime.datetime, end: datetime.datetime, active: bool):
+    data = {
+        'start': start.isoformat(),
+        'end': end.isoformat(),
+        'active': active,
+    }
+    response = requests.post(
+        url=f'{settings.MATCHMAKING_HTTP}/leagues/',
+        headers={'API-Key': settings.MATCHMAKING_API_KEY},
+        json=data,
+    )
+    leagues = response.json()
+    return leagues
+
+
+def update_league(league_id: int, start: datetime.datetime, end: datetime.datetime, active: bool):
+    data = {
+        'start': start.isoformat(),
+        'end': end.isoformat(),
+        'active': active,
+    }
+    response = requests.put(
+        url=f'{settings.MATCHMAKING_HTTP}/leagues/{league_id}',
+        headers={'API-Key': settings.MATCHMAKING_API_KEY},
+        json=data,
+    )
+    league = response.json()
+    return league
+
+
+def delete_league(league_id: int):
+    response = requests.put(
+        url=f'{settings.MATCHMAKING_HTTP}/leagues/{league_id}',
+        headers={'API-Key': settings.MATCHMAKING_API_KEY},
+    )
+    league = response.json()
+    return league
