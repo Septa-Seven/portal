@@ -6,13 +6,12 @@ from rest_framework.viewsets import GenericViewSet
 
 from apps.teams.services import querysets
 from utils import matchmaking, teams
-from apps.teams.models import *
 from apps.teams.permissions import IsLeader, HasTeam, HasNoTeam, IsInvited, IsInviter
 from apps.teams.serializers import (
     CreateInvitationSerializer,
     TeamSerializer,
     InvitationSerializer,
-    TeamShortSerializer,
+    TeamCreateSerializer,
 )
 from django.conf import settings
 
@@ -33,7 +32,7 @@ class TeamViewSet(mixins.CreateModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'create':
-            serializer_class = TeamShortSerializer
+            serializer_class = TeamCreateSerializer
         elif self.action == 'invitations':
             serializer_class = InvitationSerializer
         else:
@@ -60,15 +59,13 @@ class TeamViewSet(mixins.CreateModelMixin,
         return [permission_class() for permission_class in permission_classes]
 
     def create(self, request, *args, **kwargs):
-        # TODO: Handle requests exception
-        team = matchmaking.create_user()
-        # TODO: name always must be provided
-        team['name'] = request.data['name']
-
-        serializer = self.get_serializer(data=team)
+        serializer = TeamCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_create(serializer, team['id'])
+        # TODO: Handle requests exception
+        team = matchmaking.create_user()
+
+        serializer.save(leader=self.request.user, id=team['id'])
 
         headers = self.get_success_headers(serializer.data)
         data = {
@@ -97,9 +94,6 @@ class TeamViewSet(mixins.CreateModelMixin,
                 league_player["connect_url"] = connect_url
 
         return Response(team_data, status=status.HTTP_200_OK)
-
-    def perform_create(self, serializer, team_id):
-        serializer.save(leader=self.request.user, id=team_id)
 
     def perform_destroy(self, instance):
         # TODO: Handle requests exception

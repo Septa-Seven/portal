@@ -23,6 +23,12 @@ class TeamSerializer(serializers.ModelSerializer):
         )
 
 
+class TeamCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = ('name', 'description')
+
+
 class TeamShortSerializer(serializers.ModelSerializer):
 
     class Meta:
