@@ -44,6 +44,18 @@ class ArticleListSerializer(serializers.ModelSerializer):
             'tags',
         )
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+
+        # Cut article preview
+        blocks = ret['body']['blocks']
+        for index, block in enumerate(blocks):
+            if block['type'] == "Delimiter":
+                blocks[:] = blocks[:index]
+                break
+
+        return ret
+
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(read_only=True)
