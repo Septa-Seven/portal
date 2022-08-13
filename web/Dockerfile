@@ -1,4 +1,4 @@
-FROM python:3.9-alpine AS builder
+FROM python:3.10-alpine AS builder
 
 # set work directory
 WORKDIR /usr/src/septacup
@@ -20,7 +20,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/septacup/wheels -r r
 #########
 
 # pull official base image
-FROM python:3.9-alpine as final
+FROM python:3.10-alpine as final
 
 EXPOSE 8000
 
