@@ -1,17 +1,21 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, mixins
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from rest_framework.viewsets import GenericViewSet
 
 from apps.teams.services import querysets
-from utils import matchmaking, teams
+from apps.users.models import User
+from common import matchmaking, teams
 from apps.teams.permissions import IsLeader, HasTeam, HasNoTeam, IsInvited, IsInviter
 from apps.teams.serializers import (
     CreateInvitationSerializer,
     TeamSerializer,
     InvitationSerializer,
     TeamCreateSerializer,
+    ExpelUserSerializer,
 )
 from django.conf import settings
 
@@ -23,38 +27,39 @@ class TeamViewSet(mixins.CreateModelMixin,
                   GenericViewSet):
 
     def get_queryset(self):
-        if self.action == 'retrieve':
-            queryset = teams.team_queryset(include_users=True)
-        else:
-            queryset = teams.team_queryset()
+        match self.action:
+            case 'retrieve':
+                queryset = teams.team_queryset(include_users=True)
+            case _:
+                queryset = teams.team_queryset()
 
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'create':
-            serializer_class = TeamCreateSerializer
-        elif self.action == 'invitations':
-            serializer_class = InvitationSerializer
-        else:
-            serializer_class = TeamSerializer
+        match self.action:
+            case 'create':
+                serializer_class = TeamCreateSerializer
+            case 'invitations':
+                serializer_class = InvitationSerializer
+            case 'expel':
+                serializer_class = ExpelUserSerializer
+            case _:
+                serializer_class = TeamSerializer
 
         return serializer_class
 
     def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated, HasNoTeam]
-        elif self.action == 'retrieve':
-            permission_classes = []
-        elif self.action == 'update':
-            permission_classes = [permissions.IsAuthenticated, IsLeader]
-        elif self.action == 'my':
-            permission_classes = [permissions.IsAuthenticated, HasTeam]
-        elif self.action == 'quit':
-            permission_classes = [permissions.IsAuthenticated, HasTeam]
-        elif self.action == 'reset_token':
-            permission_classes = [permissions.IsAuthenticated, IsLeader]
-        else:
-            permission_classes = [permissions.IsAdminUser | IsLeader]
+        match self.action:
+            case 'create':
+                permission_classes = [permissions.IsAuthenticated, HasNoTeam]
+            case 'retrieve' | 'expel':
+                permission_classes = []
+            case 'update' | 'reset_token':
+                permission_classes = [permissions.IsAuthenticated, IsLeader]
+            case 'my' | 'quit':
+                permission_classes = [permissions.IsAuthenticated, HasTeam]
+            case _:
+                permission_classes = [permissions.IsAdminUser | IsLeader]
 
         return [permission_class() for permission_class in permission_classes]
 
@@ -128,6 +133,23 @@ class TeamViewSet(mixins.CreateModelMixin,
         team = self.request.user.team
         self.kwargs['pk'] = team.pk if team else None
         return self.retrieve(request)
+
+    @action(detail=False, methods=['POST'])
+    def expel(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid()
+
+        user_id = serializer.data["user_id"]
+        if request.user.id == user_id:
+            raise ValidationError(detail="You aren't allowed to expel yourself.")
+
+        user = get_object_or_404(User, pk=user_id)
+
+        if user.team != request.user.team:
+            raise ValidationError(detail="User is not in your team.")
+
+        user.team = None
+        user.save()
 
 
 class InvitationViewSet(

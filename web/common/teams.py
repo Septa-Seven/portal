@@ -23,7 +23,8 @@ def extend_team(team, include_users=False):
         team_object = queryset.get(pk=team['id'])
     except Team.DoesNotExist:
         extend_info = {
-            'name': 'Not found'
+            'name': 'Not found',
+            'description': None,
         }
     else:
         if include_users:

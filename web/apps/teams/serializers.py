@@ -36,6 +36,10 @@ class TeamShortSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class ExpelUserSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+
+
 class CurrentUsersTeamDefault:
     requires_context = True
 
