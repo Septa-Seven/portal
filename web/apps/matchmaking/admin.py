@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin
 
 from apps.matchmaking.models import League
-from utils import matchmaking
+from common import matchmaking
 
 
 class LeagueForm(forms.ModelForm):

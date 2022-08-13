@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from utils import matchmaking, teams
+from common import matchmaking, teams, leagues
 
 
 def extend_game(game):
@@ -57,6 +57,8 @@ class LeagueRetrieveView(APIView):
             )
             league['connect_url'] = connect_url
 
+        leagues.extend_league(league)
+
         return Response(league)
 
 
@@ -76,8 +78,12 @@ class LeagueListView(APIView):
     def get(self, request, format=None):
         qp = request.query_params
 
-        leagues = matchmaking.list_leagues(
+        leagues_ = matchmaking.list_leagues(
             qp.get('page', 0),
             qp.get('size', None),
         )
-        return Response(leagues)
+
+        for league in leagues_:
+            leagues.extend_league(league)
+
+        return Response(leagues_)
