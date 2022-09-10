@@ -8,7 +8,9 @@ from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 
 
-class CatchOAuth2ErrorSocialLoginView(SocialLoginView):
+class CustomSocialLoginView(SocialLoginView):
+    callback_route: str = None
+
     def post(self, request, *args, **kwargs):
         # TODO: Issue: https://github.com/iMerica/dj-rest-auth/issues/275
         try:
@@ -16,39 +18,31 @@ class CatchOAuth2ErrorSocialLoginView(SocialLoginView):
         except OAuth2Error:
             raise AuthenticationFailed
 
+    @property
+    def callback_url(self):
+        domain = self.request.META.get("HTTP_ORIGIN", settings.DOMAIN)
+        return domain + self.callback_route
 
-class GithubLogin(CatchOAuth2ErrorSocialLoginView):
 
+class GithubLogin(CustomSocialLoginView):
     adapter_class = GitHubOAuth2Adapter
     client_class = OAuth2Client
-
-    @property
-    def callback_url(self):
-        return settings.GITHUB_CALLBACK_URL
+    callback_route = '/github_callback'
 
 
-class VKLogin(CatchOAuth2ErrorSocialLoginView):
+class VKLogin(CustomSocialLoginView):
     adapter_class = VKOAuth2Adapter
     client_class = OAuth2Client
-
-    @property
-    def callback_url(self):
-        return settings.VK_CALLBACK_URL
+    callback_route = '/vk_callback'
 
 
-class GoogleLogin(CatchOAuth2ErrorSocialLoginView):
+class GoogleLogin(CustomSocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
-
-    @property
-    def callback_url(self):
-        return settings.GOOGLE_CALLBACK_URL
+    callback_route = '/google_callback'
 
 
-class YandexLogin(CatchOAuth2ErrorSocialLoginView):
+class YandexLogin(CustomSocialLoginView):
     adapter_class = YandexAuth2Adapter
     client_class = OAuth2Client
-
-    @property
-    def callback_url(self):
-        return settings.YANDEX_CALLBACK_URL
+    callback_route = '/yandex_callback'

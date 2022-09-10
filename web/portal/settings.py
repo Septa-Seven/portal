@@ -208,11 +208,6 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
-GITHUB_CALLBACK_URL = DOMAIN + '/github_callback'
-VK_CALLBACK_URL = DOMAIN + '/vk_callback'
-GOOGLE_CALLBACK_URL = DOMAIN + '/google_callback'
-YANDEX_CALLBACK_URL = DOMAIN + '/yandex_callback'
-
 # TODO: Email activation
 
 # JWT (enable rest_framework_simplejwt)
@@ -249,6 +244,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = BACKEND_DOMAIN + '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# TODO: Prod and dev settings for CORS
 CORS_ALLOW_ALL_ORIGINS = True
 
 
