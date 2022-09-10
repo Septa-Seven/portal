@@ -52,7 +52,7 @@ class TeamViewSet(mixins.CreateModelMixin,
         match self.action:
             case 'create':
                 permission_classes = [permissions.IsAuthenticated, HasNoTeam]
-            case 'retrieve' | 'expel':
+            case 'retrieve' | 'team_settings':
                 permission_classes = []
             case 'update' | 'reset_token':
                 permission_classes = [permissions.IsAuthenticated, IsLeader]
