@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djangorestframework_camel_case',
-    'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',

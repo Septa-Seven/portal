@@ -128,27 +128,49 @@ def list_leagues(page: int = 0, size: int = None):
     return leagues
 
 
-def create_league(start: datetime.datetime, end: datetime.datetime, active: bool):
+def create_league(
+    start: datetime.datetime | None = None,
+    end: datetime.datetime | None = None,
+    active: bool | None = None,
+    league_settings: dict | None = None,
+):
     data = {
-        'start': start.isoformat(),
-        'end': end.isoformat(),
-        'active': active,
+        "settings": league_settings or {},
     }
+    if start is not None:
+        data['start'] = start.isoformat()
+    if end is not None:
+        data['end'] = end.isoformat()
+    if active is not None:
+        data['active'] = active
+
     response = requests.post(
         url=f'{settings.MATCHMAKING_HTTP}/leagues/',
         headers={'API-Key': settings.MATCHMAKING_API_KEY},
         json=data,
     )
+    response.raise_for_status()
     leagues = response.json()
     return leagues
 
 
-def update_league(league_id: int, start: datetime.datetime, end: datetime.datetime, active: bool):
+def update_league(
+    league_id: int,
+    start: datetime.datetime | None = None,
+    end: datetime.datetime | None = None,
+    active: bool | None = None,
+    league_settings: dict | None = None,
+):
     data = {
-        'start': start.isoformat(),
-        'end': end.isoformat(),
-        'active': active,
+        "settings": league_settings or {},
     }
+    if start is not None:
+        data['start'] = start.isoformat()
+    if end is not None:
+        data['end'] = end.isoformat()
+    if active is not None:
+        data['active'] = active
+
     response = requests.put(
         url=f'{settings.MATCHMAKING_HTTP}/leagues/{league_id}',
         headers={'API-Key': settings.MATCHMAKING_API_KEY},

@@ -11,14 +11,15 @@ class LeagueForm(forms.ModelForm):
     start = forms.SplitDateTimeField(required=False)
     end = forms.SplitDateTimeField(required=False)
     active = forms.BooleanField(required=False)
+    settings = forms.JSONField(required=False)
 
     class Meta:
         model = League
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        if 'instance' in kwargs:
-            instance = kwargs['instance']
+        instance = kwargs.get('instance')
+        if instance:
             initial = matchmaking.retrieve_league(instance.pk)
             if initial['end']:
                 initial['end'] = datetime.datetime.fromisoformat(initial['end'])
@@ -40,6 +41,7 @@ class LeagueAdmin(admin.ModelAdmin):
         start = form.cleaned_data.get('start', None)
         end = form.cleaned_data.get('end', None)
         active = form.cleaned_data.get('active', None)
+        league_settings = form.cleaned_data.get('settings', None)
 
         if change:
             matchmaking.update_league(
@@ -47,12 +49,14 @@ class LeagueAdmin(admin.ModelAdmin):
                 start=start,
                 end=end,
                 active=active,
+                league_settings=league_settings,
             )
         else:
             league = matchmaking.create_league(
                 start=start,
                 end=end,
                 active=active,
+                league_settings=league_settings,
             )
 
             obj.id = league['id']

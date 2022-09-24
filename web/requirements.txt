@@ -12,7 +12,6 @@ django-templated-mail
 djangorestframework
 djangorestframework-simplejwt
 djangorestframework-camel-case
-drf-yasg
 gunicorn
 psycopg2-binary
 requests
