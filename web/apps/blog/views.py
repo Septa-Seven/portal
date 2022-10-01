@@ -46,7 +46,7 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Article.objects.annotate(
         comments_count=Count('article_comments')
-    )
+    ).order_by('-created_at')
     permission_classes = (permissions.AllowAny,)
 
     # def get_similar_articles(self):
