@@ -7,7 +7,7 @@ from common import matchmaking, teams, leagues
 
 def extend_game(game):
     for player in game['players']:
-        teams.extend_team(player, include_users=False)
+        teams.enrich_team(player, include_users=False)
 
 
 class GamesRetrieveView(APIView):
@@ -57,7 +57,7 @@ class LeagueRetrieveView(APIView):
             )
             league['connect_url'] = connect_url
 
-        leagues.extend_league(league)
+        leagues.enrich_league(league)
 
         return Response(league)
 
@@ -68,7 +68,7 @@ class LeagueTopView(APIView):
         league_top = matchmaking.league_top(pk)
 
         for league_player in league_top:
-            teams.extend_team(league_player, include_users=False)
+            teams.enrich_team(league_player, include_users=False)
 
         return Response(league_top)
 
@@ -80,10 +80,10 @@ class LeagueListView(APIView):
 
         leagues_ = matchmaking.list_leagues(
             qp.get('page', 0),
-            qp.get('size', None),
+            qp.get('size'),
         )
 
         for league in leagues_:
-            leagues.extend_league(league)
+            leagues.enrich_league(league)
 
         return Response(leagues_)

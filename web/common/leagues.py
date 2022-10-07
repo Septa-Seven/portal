@@ -10,7 +10,7 @@ def get_or_create_league(league_id: int):
     return obj
 
 
-def extend_league(league: dict):
+def enrich_league(league: dict):
     league_id = league['id']
     league_obj = get_or_create_league(league_id)
 

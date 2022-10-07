@@ -17,7 +17,7 @@ def team_queryset(include_users=False):
     return queryset
 
 
-def extend_team(team, include_users=False):
+def enrich_team(team, include_users=False):
     queryset = team_queryset(include_users)
     try:
         team_object = queryset.get(pk=team['id'])
