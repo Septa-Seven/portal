@@ -23,6 +23,7 @@ def _request(method, url, json=None, params=None):
         raise MatchmakingException(
             detail='Matchmaking unavailable',
         )
+    return response
 
 
 def construct_connect_url(league_id: int, user_id: int):
