@@ -1,5 +1,3 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from rest_framework import mixins, permissions
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.viewsets import GenericViewSet
@@ -53,10 +51,6 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
                 queryset = queryset.exclude(id__in=users_with_invitation)
 
         return queryset
-
-    @method_decorator(cache_page(60 * 5))
-    def list(self, *args, **kwargs):
-        return super().list(*args, **kwargs)
 
 
 class UserInvitationsListViewSet(mixins.ListModelMixin, GenericViewSet):
