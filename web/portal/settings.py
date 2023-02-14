@@ -276,3 +276,16 @@ if USE_AWS_S3:
     AWS_S3_BUCKET_NAME_STATIC = env('AWS_S3_BUCKET_NAME')
     AWS_S3_ADDRESSING_STYLE_STATIC = 'auto'
     AWS_S3_KEY_PREFIX_STATIC = 'static'
+
+
+SENTRY_DSN = env('SENTRY_DSN')
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+    )
